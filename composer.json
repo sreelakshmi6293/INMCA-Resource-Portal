@@ -1,0 +1,6 @@
+{
+    "name": "inmca/portal",
+    "require": {
+        "phpmailer/phpmailer": "^7.1"
+    }
+}
