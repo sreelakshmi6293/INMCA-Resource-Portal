@@ -9,11 +9,15 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
 }
 
 // 2. Fetch Dashboard Statistics
-// Total Registered Students (from student_register table)
+// Total Registered Students
 $total_students_query = $conn->query("SELECT COUNT(*) AS total FROM student_register");
 $total_students = $total_students_query->fetch_assoc()['total'] ?? 0;
 
-// Total Admin Accounts (now fetching from the dedicated 'admins' table)
+// Total Faculty Accounts
+$total_faculty_query = $conn->query("SELECT COUNT(*) AS total FROM faculty");
+$total_faculty = $total_faculty_query->fetch_assoc()['total'] ?? 0;
+
+// Total Admin Accounts
 $total_admins_query = $conn->query("SELECT COUNT(*) AS total FROM admins");
 $total_admins = $total_admins_query->fetch_assoc()['total'] ?? 0;
 
@@ -95,8 +99,9 @@ $students = $stmt->get_result();
         <div>
             <h2>Admin Control</h2>
             <ul class="nav-links">
-                <li><a href="admin_dashboard.php" class="active">Dashboard</a></li>
-                <!-- Add more links here later, like 'Add Admin' or 'Settings' -->
+                <li><a href="admin_dashboard.php" class="active">Manage Students</a></li>
+                <li><a href="manage_faculty.php">Manage Faculty</a></li>
+                <li><a href="manage_subjects.php">Manage Subjects</a></li>
             </ul>
         </div>
         <a href="logout.php" class="logout-btn">Logout</a>
@@ -115,7 +120,11 @@ $students = $stmt->get_result();
                 <h3>Total Students</h3>
                 <div class="number"><?php echo $total_students; ?></div>
             </div>
-            <div class="stat-card" style="border-left-color: #2b6cb0;">
+            <div class="stat-card" style="border-left-color: #3182ce;">
+                <h3>Total Faculty</h3>
+                <div class="number"><?php echo $total_faculty; ?></div>
+            </div>
+            <div class="stat-card" style="border-left-color: #38a169;">
                 <h3>System Administrators</h3>
                 <div class="number"><?php echo $total_admins; ?></div>
             </div>
@@ -124,7 +133,7 @@ $students = $stmt->get_result();
         <!-- Student Management Table -->
         <div class="table-card">
             <div class="table-header">
-                <h2>Registered Students</h2>
+                <h2>Registered Students Management</h2>
                 <form method="GET" action="" class="search-box">
                     <input type="text" name="search" placeholder="Search name, username, email..." value="<?php echo htmlspecialchars($search); ?>">
                     <button type="submit">Search</button>
@@ -155,9 +164,8 @@ $students = $stmt->get_result();
                                 <td><?php echo htmlspecialchars($row['email']); ?></td>
                                 <td><?php echo htmlspecialchars($row['phone'] ?? 'N/A'); ?></td>
                                 <td>
-                                    <!-- Placeholder links for future edit/delete functionality -->
-                                    <a href="#" class="action-btn btn-edit">Edit</a>
-                                    <a href="#" class="action-btn btn-delete" onclick="return confirm('Are you sure you want to delete this student?');">Delete</a>
+                                    <a href="edit_student.php?id=<?php echo $row['id']; ?>" class="action-btn btn-edit">Edit</a>
+                                    <a href="delete_student.php?id=<?php echo $row['id']; ?>" class="action-btn btn-delete" onclick="return confirm('Are you sure you want to delete this student?');">Delete</a>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
