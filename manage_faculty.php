@@ -17,9 +17,9 @@ if (file_exists('vendor/autoload.php')) {
     die("PHPMailer files not found. Please install PHPMailer via Composer or place it in the project directory.");
 }
 
-// Security Check: Admin role validation
+// Security Check: Admin role validation (Redirects to unified login page)
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header("Location: admin_login.php");
+    header("Location: login.php");
     exit;
 }
 
@@ -40,9 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if (!empty($name) && !empty($email)) {
         
-        // 1. DUPLICATE CHECK: Query database for existing email or name
-        $check_stmt = $conn->prepare("SELECT id, email, name FROM faculty WHERE email = ? OR name = ?");
-        $check_stmt->bind_param("ss", $email, $name);
+        // 1. CROSS-TABLE DUPLICATE CHECK: Query both 'faculty' AND 'student_register' tables
+        $check_stmt = $conn->prepare("
+            SELECT email, name, 'faculty' AS account_type FROM faculty WHERE email = ? OR name = ?
+            UNION
+            SELECT email, name, 'student' AS account_type FROM student_register WHERE email = ? OR name = ?
+        ");
+        $check_stmt->bind_param("ssss", $email, $name, $email, $name);
         $check_stmt->execute();
         $check_result = $check_stmt->get_result();
 
@@ -50,22 +54,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $existing_user = $check_result->fetch_assoc();
             $has_alert = true;
             
-            if ($existing_user['email'] === $email) {
-                $message = "<div id='alert-banner' class='alert alert-danger'><strong>Duplicate Entry Alert:</strong> A faculty account with the email <u>" . htmlspecialchars($email) . "</u> already exists. Please enter a different email address.</div>";
+            if (strtolower($existing_user['email']) === strtolower($email)) {
+                $role_label = ucfirst($existing_user['account_type']);
+                $message = "<div id='alert-banner' class='alert alert-danger'><strong>Duplicate Email Alert:</strong> The email <u>" . htmlspecialchars($email) . "</u> is already registered as a <strong>{$role_label}</strong>. Please enter a different email address.</div>";
             } else {
-                $message = "<div id='alert-banner' class='alert alert-warning'><strong>Warning:</strong> A faculty member named <u>" . htmlspecialchars($name) . "</u> is already registered. Please check the name or modify it to avoid confusion.</div>";
+                $message = "<div id='alert-banner' class='alert alert-warning'><strong>Warning:</strong> A user named <u>" . htmlspecialchars($name) . "</u> is already registered in the system. Please verify the name or modify it to avoid confusion.</div>";
             }
             $check_stmt->close();
         } else {
             $check_stmt->close();
 
-            // 2. Generate Credentials
+            // 2. Generate Unique Username and Password
             $clean_name = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $name));
             $generated_username = $clean_name . rand(100, 999);
             $generated_password = "Fac#" . rand(1000, 9999);
             $hashed_password = password_hash($generated_password, PASSWORD_DEFAULT);
 
-            // 3. Insert into Database
+            // 3. Insert into Faculty Table
             $stmt = $conn->prepare("INSERT INTO faculty (name, username, email, password) VALUES (?, ?, ?, ?)");
             $stmt->bind_param("ssss", $name, $generated_username, $email, $hashed_password);
 
@@ -77,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     'email' => $email
                 ];
 
-                // 4. Send Email via PHPMailer
+                // 4. Send Email Notification via PHPMailer
                 $mail = new PHPMailer(true);
 
                 try {
@@ -96,11 +101,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     $mail->Subject = 'Your Faculty Account Credentials';
                     $mail->Body    = "
                     <html>
-                    <body style='font-family: Arial, sans-serif;'>
+                    <body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'>
                       <h2>Welcome, " . htmlspecialchars($name) . "!</h2>
                       <p>Your faculty account has been created successfully.</p>
-                      <p><strong>Username:</strong> " . htmlspecialchars($generated_username) . "<br>
-                      <strong>Temporary Password:</strong> " . htmlspecialchars($generated_password) . "</p>
+                      <p>You can now log in using either your username or email address:</p>
+                      <div style='background: #f4f6f9; padding: 15px; border-radius: 5px; margin: 15px 0;'>
+                        <p style='margin: 5px 0;'><strong>Username:</strong> " . htmlspecialchars($generated_username) . "</p>
+                        <p style='margin: 5px 0;'><strong>Email:</strong> " . htmlspecialchars($email) . "</p>
+                        <p style='margin: 5px 0;'><strong>Temporary Password:</strong> " . htmlspecialchars($generated_password) . "</p>
+                      </div>
+                      <p>Please log in and change your password as soon as possible.</p>
                     </body>
                     </html>";
 
@@ -129,6 +139,7 @@ $faculty_list = $conn->query("SELECT id, name, username, email, created_at FROM 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Assign Faculty Credentials</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
@@ -227,13 +238,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const emailInput = document.getElementById('faculty_email');
     const alertBanner = document.getElementById('alert-banner');
 
-    // 1. Clear input fields if an alert (duplicate/error) is currently displayed
+    // 1. Clear input fields if a duplicate or error alert is currently displayed
     <?php if ($has_alert): ?>
         if (nameInput) nameInput.value = '';
         if (emailInput) emailInput.value = '';
     <?php endif; ?>
 
-    // 2. Hide the alert message when the admin starts re-entering data into any input field
+    // 2. Hide alert message when user modifies input
     const hideAlert = function () {
         if (alertBanner) {
             alertBanner.style.display = 'none';

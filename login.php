@@ -2,6 +2,20 @@
 session_start();
 require_once 'db.php';
 
+// Redirect if user is already logged in based on their role
+if (isset($_SESSION['user_id']) && isset($_SESSION['role'])) {
+    if ($_SESSION['role'] === 'admin') {
+        header("Location: admin_dashboard.php");
+        exit;
+    } elseif ($_SESSION['role'] === 'faculty') {
+        header("Location: faculty_dashboard.php");
+        exit;
+    } elseif ($_SESSION['role'] === 'student') {
+        header("Location: dashboard.php");
+        exit;
+    }
+}
+
 $errors = [];
 $success_message = '';
 
@@ -17,29 +31,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username_email) || empty($password)) {
         $errors[] = "Please fill in all fields.";
     } else {
-        $stmt = $conn->prepare("SELECT id, name, username, password, role FROM student_register WHERE username = ? OR email = ?");
+        $user_found = false;
+
+        // 1. CHECK ADMINS TABLE
+        $stmt = $conn->prepare("SELECT id, name, username, email, password, 'admin' AS role FROM admins WHERE username = ? OR email = ? LIMIT 1");
         $stmt->bind_param("ss", $username_email, $username_email);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows === 1) {
             $user = $result->fetch_assoc();
-            
-            if (password_verify($password, $user['password'])) {
-                session_regenerate_id(true);
-                $_SESSION['user_id']   = $user['id'];
-                $_SESSION['user_name'] = $user['name'];
-                $_SESSION['role']      = $user['role'];
+            $stmt->close();
 
-                header("Location: dashboard.php");
+            if (password_verify($password, $user['password'])) {
+                $user_found = true;
+
+                // Rehash password if needed
+                if (password_needs_rehash($user['password'], PASSWORD_DEFAULT)) {
+                    $new_hash = password_hash($password, PASSWORD_DEFAULT);
+                    $up_stmt = $conn->prepare("UPDATE admins SET password = ? WHERE id = ?");
+                    $up_stmt->bind_param("si", $new_hash, $user['id']);
+                    $up_stmt->execute();
+                    $up_stmt->close();
+                }
+
+                session_regenerate_id(true);
+                $_SESSION['user_id']  = $user['id'];
+                $_SESSION['name']     = $user['name'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['email']    = $user['email'];
+                $_SESSION['role']     = 'admin';
+
+                header("Location: admin_dashboard.php");
                 exit;
             } else {
                 $errors[] = "Invalid password. Please try again.";
+                $user_found = true;
             }
         } else {
+            $stmt->close();
+        }
+
+        // 2. CHECK FACULTY TABLE (If not found in admins)
+        if (!$user_found) {
+            $stmt = $conn->prepare("SELECT id, name, username, email, password, 'faculty' AS role FROM faculty WHERE username = ? OR email = ? LIMIT 1");
+            $stmt->bind_param("ss", $username_email, $username_email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 1) {
+                $user = $result->fetch_assoc();
+                $stmt->close();
+
+                if (password_verify($password, $user['password'])) {
+                    $user_found = true;
+
+                    session_regenerate_id(true);
+                    $_SESSION['user_id']   = $user['id'];
+                    $_SESSION['user_name'] = $user['name'];
+                    $_SESSION['name']      = $user['name'];
+                    $_SESSION['username']  = $user['username'];
+                    $_SESSION['email']     = $user['email'];
+                    $_SESSION['role']      = 'faculty';
+
+                    header("Location: faculty_dashboard.php");
+                    exit;
+                } else {
+                    $errors[] = "Invalid password. Please try again.";
+                    $user_found = true;
+                }
+            } else {
+                $stmt->close();
+            }
+        }
+
+        // 3. CHECK STUDENTS TABLE (If not found in admins or faculty)
+        if (!$user_found) {
+            $stmt = $conn->prepare("SELECT id, name, username, password, COALESCE(role, 'student') AS role FROM student_register WHERE username = ? OR email = ? LIMIT 1");
+            $stmt->bind_param("ss", $username_email, $username_email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 1) {
+                $user = $result->fetch_assoc();
+                $stmt->close();
+
+                if (password_verify($password, $user['password'])) {
+                    $user_found = true;
+
+                    session_regenerate_id(true);
+                    $_SESSION['user_id']   = $user['id'];
+                    $_SESSION['user_name'] = $user['name'];
+                    $_SESSION['role']      = 'student';
+
+                    header("Location: dashboard.php");
+                    exit;
+                } else {
+                    $errors[] = "Invalid password. Please try again.";
+                    $user_found = true;
+                }
+            } else {
+                $stmt->close();
+            }
+        }
+
+        // If user wasn't found in any of the 3 tables
+        if (!$user_found && empty($errors)) {
             $errors[] = "No account found with that username or email.";
         }
-        $stmt->close();
     }
 }
 ?>
@@ -48,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Login</title>
+    <title>Portal Login</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         body { background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
@@ -83,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 
 <div class="card">
-    <h2>Student Login</h2>
+    <h2>Portal Login</h2>
 
     <?php if (!empty($success_message)): ?>
         <div class="alert-success"><?php echo htmlspecialchars($success_message); ?></div>
@@ -101,7 +200,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="form-group">
             <label>Username or Email</label>
-            <input type="text" name="user_login_identity" id="user_login_identity" autocomplete="off" required>
+            <input type="text" name="user_login_identity" id="user_login_identity" value="<?php echo htmlspecialchars($_POST['user_login_identity'] ?? ''); ?>" autocomplete="off" required>
         </div>
         <div class="form-group">
             <label>Password</label>
@@ -117,20 +216,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="options">
         <a href="forgot_password.php">Forgot Password?</a>
-        <a href="register.php">Create Account</a>
+        <a href="register.php">Create Student Account</a>
     </div>
 </div>
 
 <script>
-function clearInputs() {
-    document.getElementById('user_login_identity').value = '';
-    document.getElementById('user_login_secret').value = '';
-}
-
-window.addEventListener('load', clearInputs);
-window.addEventListener('pageshow', clearInputs);
-setTimeout(clearInputs, 100);
-
 function togglePasswordVisibility(inputId, btn) {
     const input = document.getElementById(inputId);
     const isPassword = input.type === 'password';
