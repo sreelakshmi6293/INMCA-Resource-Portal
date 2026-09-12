@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Email Content
                 $mail->isHTML(true);
-                $mail->Subject = 'Welcome to Student Portal - Account Registered';
+                $mail->Subject = 'Welcome to INMCA Resource Portal - Account Registered';
                 $mail->Body    = "
                     <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>
                         <h2 style='color: #1a73e8; text-align: center;'>Registration Successful!</h2>

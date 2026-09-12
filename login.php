@@ -11,7 +11,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['role'])) {
         header("Location: faculty_dashboard.php");
         exit;
     } elseif ($_SESSION['role'] === 'student') {
-        header("Location: dashboard.php");
+        header("Location: student-dashboard.html");
         exit;
     }
 }
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['user_name'] = $user['name'];
                     $_SESSION['role']      = 'student';
 
-                    header("Location: dashboard.php");
+                    header("Location: student-dashboard.html");
                     exit;
                 } else {
                     $errors[] = "Invalid password. Please try again.";
