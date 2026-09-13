@@ -2,60 +2,95 @@
 session_start();
 require_once 'db.php';
 
-$raw_token   = $_GET['token'] ?? '';
-$errors      = [];
-$token_valid = false;
-$email       = null;
+date_default_timezone_set('Asia/Kolkata');
 
-// Validate incoming token
-if (!empty($raw_token)) {
-    $token_hash = hash('sha256', $raw_token);
+$token = $_GET['token'] ?? '';
+$error = '';
+$success = '';
 
-    $stmt = $conn->prepare("SELECT email FROM password_resets WHERE token_hash = ? AND expires_at > NOW()");
+// 1. Verify token exists and is not expired
+if (!empty($token)) {
+    $token_hash = hash('sha256', $token);
+    
+    $stmt = $conn->prepare("SELECT email, expires_at FROM password_resets WHERE token_hash = ?");
     $stmt->bind_param("s", $token_hash);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($row = $result->fetch_assoc()) {
-        $token_valid = true;
-        $email       = $row['email'];
+    if ($reset = $result->fetch_assoc()) {
+        if (strtotime($reset['expires_at']) <= time()) {
+            $error = "This password reset link has expired. Please request a new one.";
+        } else {
+            $email = $reset['email'];
+        }
     } else {
-        $errors[] = "Invalid or expired password reset link.";
+        $error = "Invalid or expired password reset link.";
     }
     $stmt->close();
 } else {
-    $errors[] = "No reset token provided.";
+    $error = "No reset token provided.";
 }
 
-// Process new password submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valid) {
-    $new_password = $_POST['new_password'] ?? '';
-    $confirm_pwd  = $_POST['confirm_password'] ?? '';
+// 2. Handle Password Submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($error)) {
+    $new_password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
 
-    if (strlen($new_password) < 6) {
-        $errors[] = "Password must be at least 6 characters long.";
-    } elseif ($new_password !== $confirm_pwd) {
-        $errors[] = "Passwords do not match.";
-    }
-
-    if (empty($errors)) {
+    if (empty($new_password) || empty($confirm_password)) {
+        $error = "Please fill in all fields.";
+    } elseif (strlen($new_password) < 6) {
+        $error = "Password must be at least 6 characters long.";
+    } elseif ($new_password !== $confirm_password) {
+        $error = "Passwords do not match.";
+    } else {
+        // Hash the new password securely
         $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
 
-        // Update password in database
-        $update_stmt = $conn->prepare("UPDATE student_register SET password = ? WHERE email = ?");
-        $update_stmt->bind_param("ss", $hashed_password, $email);
-        $update_stmt->execute();
-        $update_stmt->close();
+        // Check which table the email exists in
+        $chk_student = $conn->prepare("SELECT id FROM student_register WHERE LOWER(email) = ?");
+        $chk_student->bind_param("s", $email);
+        $chk_student->execute();
+        $is_student = $chk_student->get_result()->num_rows > 0;
+        $chk_student->close();
 
-        // Invalidate token so it cannot be reused
-        $del_stmt = $conn->prepare("DELETE FROM password_resets WHERE email = ?");
-        $del_stmt->bind_param("s", $email);
-        $del_stmt->execute();
-        $del_stmt->close();
+        $updated = false;
 
-        $_SESSION['success'] = "Password updated successfully! Please log in.";
-        header("Location: login.php");
-        exit;
+        if ($is_student) {
+            // Update Student Password
+            $upd = $conn->prepare("UPDATE student_register SET password = ? WHERE LOWER(email) = ?");
+            $upd->bind_param("ss", $hashed_password, $email);
+            $updated = $upd->execute();
+            $upd->close();
+        } else {
+            // Check Faculty Table
+            $chk_faculty = $conn->prepare("SELECT id FROM faculty WHERE LOWER(email) = ?");
+            $chk_faculty->bind_param("s", $email);
+            $chk_faculty->execute();
+            $is_faculty = $chk_faculty->get_result()->num_rows > 0;
+            $chk_faculty->close();
+
+            if ($is_faculty) {
+                // Update Faculty Password
+                $upd = $conn->prepare("UPDATE faculty SET password = ? WHERE LOWER(email) = ?");
+                $upd->bind_param("ss", $hashed_password, $email);
+                $updated = $upd->execute();
+                $upd->close();
+            }
+        }
+
+        if ($updated) {
+            // Delete used token from database
+            $del = $conn->prepare("DELETE FROM password_resets WHERE LOWER(email) = ?");
+            $del->bind_param("s", $email);
+            $del->execute();
+            $del->close();
+
+            $_SESSION['success'] = "Password reset successfully! You can now log in with your new password.";
+            header("Location: login.php");
+            exit;
+        } else {
+            $error = "Failed to update password. Account not found.";
+        }
     }
 }
 ?>
@@ -64,68 +99,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $token_valid) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set New Password</title>
+    <title>Reset Password</title>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         body { background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .card { background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         .card h2 { text-align: center; margin-bottom: 20px; color: #1a73e8; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #333; font-size: 14px; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; outline: none; }
         .btn { width: 100%; padding: 10px; background: #1a73e8; border: none; color: #fff; font-weight: bold; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .btn:disabled { background: #a0c3ff; cursor: not-allowed; }
-        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; font-size: 13px; margin-bottom: 15px; }
-
-        .password-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
-        .password-wrapper input { width: 100%; padding: 10px; padding-right: 42px !important; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; outline: none; }
+        .btn:hover { background: #1557b0; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; font-size: 13px; margin-bottom: 15px; text-align: center; }
+        .link { text-align: center; margin-top: 15px; font-size: 14px; }
+        .link a { color: #1a73e8; text-decoration: none; font-weight: 600; }
         
-        input[type="password"]::-ms-reveal,
-        input[type="password"]::-ms-clear { display: none !important; }
-
-        .toggle-password { position: absolute; right: 10px; background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #718096; padding: 4px; }
-        .toggle-password:hover { color: #1a73e8; }
+        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .password-wrapper input { padding-right: 42px !important; }
+        .toggle-password { position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #718096; padding: 4px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Set New Password</h2>
+    <h2>Reset Password</h2>
 
-    <?php if (!empty($errors)): ?>
+    <?php if (!empty($error)): ?>
         <div class="alert-error">
-            <?php foreach ($errors as $error) { echo "• " . htmlspecialchars($error) . "<br>"; } ?>
+            <?php echo htmlspecialchars($error); ?>
         </div>
     <?php endif; ?>
 
-    <?php if ($token_valid): ?>
-        <form method="POST" action="">
-            <div class="form-group">
-                <label>New Password</label>
-                <div class="password-wrapper">
-                    <input type="password" id="new_password" name="new_password" placeholder="At least 6 characters" required>
-                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('new_password', this)" tabindex="-1">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </button>
-                </div>
+    <?php if (empty($error) || $_SERVER['REQUEST_METHOD'] === 'POST'): ?>
+    <form method="POST" action="">
+        <div class="form-group">
+            <label>New Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="password" name="password" placeholder="At least 6 characters" required>
+                <button type="button" class="toggle-password" onclick="toggleVisibility('password', this)" tabindex="-1">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
             </div>
-            <div class="form-group">
-                <label>Confirm Password</label>
-                <div class="password-wrapper">
-                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
-                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirm_password', this)" tabindex="-1">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    </button>
-                </div>
+        </div>
+
+        <div class="form-group">
+            <label>Confirm New Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
+                <button type="button" class="toggle-password" onclick="toggleVisibility('confirm_password', this)" tabindex="-1">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
             </div>
-            <button type="submit" class="btn">Update Password</button>
-        </form>
-    <?php else: ?>
-        <p style="text-align: center; font-size: 14px;"><a href="forgot_password.php" style="color: #1a73e8;">Request a new reset link</a></p>
+        </div>
+
+        <button type="submit" class="btn">Update Password</button>
+    </form>
     <?php endif; ?>
+
+    <div class="link">
+        <a href="login.php">Back to Login</a>
+    </div>
 </div>
 
 <script>
-function togglePasswordVisibility(inputId, btn) {
+function toggleVisibility(inputId, btn) {
     const input = document.getElementById(inputId);
     const isPassword = input.type === 'password';
     input.type = isPassword ? 'text' : 'password';

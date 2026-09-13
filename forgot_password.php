@@ -20,11 +20,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email     = filter_var(strtolower($raw_email), FILTER_VALIDATE_EMAIL);
 
     if ($email) {
-        // 2. Check if user exists in your student table (case-insensitive check)
-        $stmt = $conn->prepare("SELECT id FROM student_register WHERE LOWER(email) = ?");
-        $stmt->bind_param("s", $email);
+        // 2. Check if user exists in student or faculty tables (case-insensitive check)
+        $stmt = $conn->prepare("
+            SELECT email FROM student_register WHERE LOWER(email) = ? 
+            UNION 
+            SELECT email FROM faculty WHERE LOWER(email) = ?
+        ");
+        $stmt->bind_param("ss", $email, $email);
         $stmt->execute();
-        $user_exists = $stmt->get_result()->num_rows === 1;
+        $user_exists = $stmt->get_result()->num_rows > 0;
         $stmt->close();
 
         if ($user_exists) {
@@ -74,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
 
                 // Sender & Recipient
-                $mail->setFrom('inmca.student.portal@gmail.com', 'Student Portal Support');
+                $mail->setFrom('inmca.student.portal@gmail.com', 'Portal Support');
                 $mail->addAddress($email);
 
                 // HTML Email Content

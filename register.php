@@ -13,6 +13,12 @@ use PHPMailer\PHPMailer\Exception;
 date_default_timezone_set('Asia/Kolkata');
 
 $errors = [];
+$field_errors = []; // Field-specific error tracker
+
+$name = '';
+$username = '';
+$phone_no = '';
+$email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name     = trim($_POST['name'] ?? '');
@@ -25,44 +31,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($name) || empty($username) || empty($phone_no) || empty($email) || empty($password)) {
         $errors[] = "All fields are required.";
     }
-    if (!preg_match("/^[a-zA-Z\s]+$/", $name)) {
-        $errors[] = "Full Name can only contain alphabetic letters and spaces.";
+    if (!empty($name) && !preg_match("/^[a-zA-Z\s]+$/", $name)) {
+        $field_errors['name'] = "Full Name can only contain alphabetic letters and spaces.";
     }
-    if (strlen($username) < 5) {
-        $errors[] = "Username must be at least 5 characters long.";
+    if (!empty($username) && strlen($username) < 5) {
+        $field_errors['username'] = "Username must be at least 5 characters long.";
     }
-    if (!preg_match('/^[0-9]{10}$/', $phone_no)) {
-        $errors[] = "Phone number must be exactly 10 digits.";
+    if (!empty($phone_no) && !preg_match('/^[0-9]{10}$/', $phone_no)) {
+        $field_errors['phone_no'] = "Phone number must be exactly 10 digits.";
     }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = "Invalid email format.";
+    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $field_errors['email'] = "Invalid email format.";
     }
-    if (strlen($password) < 6) {
-        $errors[] = "Password must be at least 6 characters long.";
+    if (!empty($password) && strlen($password) < 6) {
+        $field_errors['password'] = "Password must be at least 6 characters long.";
     }
 
-    // Check Duplicate Records
-    if (empty($errors)) {
+    // Check Duplicate Records if no basic syntax errors
+    if (empty($errors) && empty($field_errors)) {
         $check_stmt = $conn->prepare("SELECT id, username, email, `phone no` FROM student_register WHERE username = ? OR email = ? OR `phone no` = ?");
         $check_stmt->bind_param("sss", $username, $email, $phone_no);
         $check_stmt->execute();
         $check_result = $check_stmt->get_result();
 
         if ($check_result->num_rows > 0) {
-            $existing_user = $check_result->fetch_assoc();
-            if ($existing_user['email'] === $email) {
-                $errors[] = "You have already registered with this email address.";
-            } else if ($existing_user['username'] === $username) {
-                $errors[] = "This username is already taken. Please choose another.";
-            } else if ($existing_user['phone no'] === $phone_no) {
-                $errors[] = "This phone number is already registered.";
+            while ($existing_user = $check_result->fetch_assoc()) {
+                if ($existing_user['email'] === $email) {
+                    $field_errors['email'] = "You have already registered with this email address.";
+                }
+                if ($existing_user['username'] === $username) {
+                    $field_errors['username'] = "This username is already taken. Please choose another.";
+                }
+                if ($existing_user['phone no'] === $phone_no) {
+                    $field_errors['phone_no'] = "This phone number is already registered.";
+                }
             }
         }
         $check_stmt->close();
     }
 
     // Insert User & Send Email
-    if (empty($errors)) {
+    if (empty($errors) && empty($field_errors)) {
         $hashed_password = password_hash($password, PASSWORD_BCRYPT);
         $role = 'student'; 
 
@@ -192,33 +201,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST" action="" autocomplete="off" onsubmit="return validateRegisterForm()">
         <div class="form-group">
             <label>Full Name</label>
-            <input type="text" id="name" name="name" placeholder="John Doe" autocomplete="off">
-            <div class="error-msg" id="msg-name"></div>
+            <input type="text" id="name" name="name" placeholder="John Doe" value="<?php echo htmlspecialchars($name); ?>" autocomplete="off" class="<?php echo isset($field_errors['name']) ? 'invalid-input' : ''; ?>">
+            <div class="error-msg" id="msg-name" style="<?php echo isset($field_errors['name']) ? 'display:block;' : ''; ?>">
+                <?php echo $field_errors['name'] ?? ''; ?>
+            </div>
         </div>
         <div class="form-group">
             <label>Username</label>
-            <input type="text" id="username" name="username" placeholder="At least 5 characters" autocomplete="off">
-            <div class="error-msg" id="msg-username"></div>
+            <input type="text" id="username" name="username" placeholder="At least 5 characters" value="<?php echo htmlspecialchars($username); ?>" autocomplete="off" class="<?php echo isset($field_errors['username']) ? 'invalid-input' : ''; ?>">
+            <div class="error-msg" id="msg-username" style="<?php echo isset($field_errors['username']) ? 'display:block;' : ''; ?>">
+                <?php echo $field_errors['username'] ?? ''; ?>
+            </div>
         </div>
         <div class="form-group">
             <label>Phone Number</label>
-            <input type="text" id="phone_no" name="phone_no" maxlength="10" placeholder="10-digit number" autocomplete="off">
-            <div class="error-msg" id="msg-phone_no"></div>
+            <input type="text" id="phone_no" name="phone_no" maxlength="10" placeholder="10-digit number" value="<?php echo htmlspecialchars($phone_no); ?>" autocomplete="off" class="<?php echo isset($field_errors['phone_no']) ? 'invalid-input' : ''; ?>">
+            <div class="error-msg" id="msg-phone_no" style="<?php echo isset($field_errors['phone_no']) ? 'display:block;' : ''; ?>">
+                <?php echo $field_errors['phone_no'] ?? ''; ?>
+            </div>
         </div>
         <div class="form-group">
             <label>Email Address</label>
-            <input type="email" id="email" name="email" placeholder="example@gmail.com" autocomplete="off">
-            <div class="error-msg" id="msg-email"></div>
+            <input type="email" id="email" name="email" placeholder="example@gmail.com" value="<?php echo htmlspecialchars($email); ?>" autocomplete="off" class="<?php echo isset($field_errors['email']) ? 'invalid-input' : ''; ?>">
+            <div class="error-msg" id="msg-email" style="<?php echo isset($field_errors['email']) ? 'display:block;' : ''; ?>">
+                <?php echo $field_errors['email'] ?? ''; ?>
+            </div>
         </div>
         <div class="form-group">
             <label>Password</label>
             <div class="password-wrapper">
-                <input type="password" id="password" name="password" placeholder="At least 6 characters" autocomplete="new-password">
+                <input type="password" id="password" name="password" placeholder="At least 6 characters" autocomplete="new-password" class="<?php echo isset($field_errors['password']) ? 'invalid-input' : ''; ?>">
                 <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password', this)" tabindex="-1">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 </button>
             </div>
-            <div class="error-msg" id="msg-password"></div>
+            <div class="error-msg" id="msg-password" style="<?php echo isset($field_errors['password']) ? 'display:block;' : ''; ?>">
+                <?php echo $field_errors['password'] ?? ''; ?>
+            </div>
         </div>
         <button type="submit" class="btn">Register Account</button>
     </form>
@@ -295,12 +314,13 @@ fields.forEach(field => {
     field.addEventListener('blur', function() {
         validateSingleField(this, false);
     });
+    
+    // Clear field-specific error (including server side duplicates) as soon as user types again
     field.addEventListener('input', function() {
-        if (this.classList.contains('invalid-input')) {
-            const msgBox = document.getElementById(`msg-${this.id}`);
-            this.classList.remove('invalid-input');
-            msgBox.style.display = 'none';
-        }
+        const msgBox = document.getElementById(`msg-${this.id}`);
+        this.classList.remove('invalid-input');
+        msgBox.innerText = '';
+        msgBox.style.display = 'none';
     });
 });
 
