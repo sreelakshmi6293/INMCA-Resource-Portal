@@ -8,18 +8,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
     exit;
 }
 
-// 2. Database Deletion Logic
-if (isset($_GET['delete_id']) && is_numeric($_GET['delete_id'])) {
-    $delete_id = intval($_GET['delete_id']);
-    $delete_stmt = $conn->prepare("DELETE FROM student_register WHERE id = ?");
-    $delete_stmt->bind_param("i", $delete_id);
-    if ($delete_stmt->execute()) {
-        header("Location: admin_dashboard.php?msg=deleted");
-        exit;
-    }
-}
-
-// 3. Fetch Dashboard Statistics
+// 2. Fetch Dashboard Statistics
 $total_students_query = $conn->query("SELECT COUNT(*) AS total FROM student_register");
 $total_students = $total_students_query->fetch_assoc()['total'] ?? 0;
 
@@ -28,40 +17,6 @@ $total_faculty = $total_faculty_query->fetch_assoc()['total'] ?? 0;
 
 $total_admins_query = $conn->query("SELECT COUNT(*) AS total FROM admins");
 $total_admins = $total_admins_query->fetch_assoc()['total'] ?? 0;
-
-// 4. Search Logic for Students
-$student_search = trim($_GET['student_search'] ?? '');
-$student_sql = "SELECT id, name, username, email, `phone no` AS phone FROM student_register WHERE 1=1";
-
-if (!empty($student_search)) {
-    $student_sql .= " AND (name LIKE ? OR username LIKE ? OR email LIKE ?)";
-}
-$student_sql .= " ORDER BY id DESC LIMIT 50";
-
-$stmt_students = $conn->prepare($student_sql);
-if (!empty($student_search)) {
-    $param_s = "%{$student_search}%";
-    $stmt_students->bind_param("sss", $param_s, $param_s, $param_s);
-}
-$stmt_students->execute();
-$students = $stmt_students->get_result();
-
-// 5. Search Logic for Faculty
-$faculty_search = trim($_GET['faculty_search'] ?? '');
-$faculty_sql = "SELECT id, name, email FROM faculty WHERE 1=1";
-
-if (!empty($faculty_search)) {
-    $faculty_sql .= " AND (name LIKE ? OR email LIKE ?)";
-}
-$faculty_sql .= " ORDER BY id DESC LIMIT 50";
-
-$stmt_faculty = $conn->prepare($faculty_sql);
-if (!empty($faculty_search)) {
-    $param_f = "%{$faculty_search}%";
-    $stmt_faculty->bind_param("ss", $param_f, $param_f);
-}
-$stmt_faculty->execute();
-$faculty_members = $stmt_faculty->get_result();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -70,6 +25,43 @@ $faculty_members = $stmt_faculty->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Management Portal</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+        header { background-color: #ffffff; border-bottom: 1px solid #e1e4e8; width: 100%; }
+        .navbar { max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #004ac6; font-weight: bold; font-size: 18px; }
+        .logo-icon { background-color: #004ac6; color: #fff; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        .nav-links { list-style: none; display: flex; align-items: center; gap: 20px; }
+        .nav-links a { text-decoration: none; color: #596579; font-weight: 500; }
+        .nav-links a.active, .nav-links a:hover { color: #004ac6; }
+        
+        /* Updated Logout Button styling to match other nav links */
+        .logout-btn { 
+            background-color: #f2f4f7; 
+            color: #344054; 
+            padding: 8px 14px; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            transition: all 0.2s ease;
+        }
+        .logout-btn:hover { 
+            background-color: #e4e7ec; 
+            color: #004ac6; 
+        }
+
+        .dashboard-container { max-width: 1200px; width: 100%; margin: 30px auto; padding: 0 20px; flex: 1; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: #fff; padding: 20px 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+        .badge { background: #e6f0ff; color: #004ac6; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); border-left: 4px solid #004ac6; }
+        .stat-label { color: #596579; font-size: 14px; font-weight: 500; }
+        .stat-card .number { font-size: 28px; font-weight: bold; color: #1a1a1a; margin-top: 5px; }
+
+        footer { background-color: #ffffff; border-top: 1px solid #e1e4e8; padding: 20px; text-align: center; margin-top: auto; }
+        .footer-logo { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold; color: #004ac6; }
+    </style>
 </head>
 <body>
 
@@ -81,10 +73,11 @@ $faculty_members = $stmt_faculty->get_result();
                 <span>AdminPortal</span>
             </a>
             <ul class="nav-links">
-                <li><a href="admin_dashboard.php" class="active">Student</a></li>
+                <li><a href="admin_dashboard.php" class="active">Dashboard</a></li>
+                <li><a href="admin_students.php">Students</a></li>
                 <li><a href="manage_faculty.php">Faculty</a></li>
                 <li><a href="manage_subjects.php">Subjects</a></li>
-                <li><a href="logout.php" class="btn logout-btn">Logout</a></li>
+                <li><a href="logout.php" class="logout-btn">Logout</a></li>
             </ul>
         </div>
     </header>
@@ -92,10 +85,6 @@ $faculty_members = $stmt_faculty->get_result();
     <!-- Main Content Container -->
     <div class="dashboard-container">
         
-        <?php if (isset($_GET['msg']) && $_GET['msg'] === 'deleted'): ?>
-            <div class="alert-success">Student record successfully deleted from database.</div>
-        <?php endif; ?>
-
         <!-- Welcome Header -->
         <div class="dashboard-header">
             <div>
@@ -121,100 +110,6 @@ $faculty_members = $stmt_faculty->get_result();
             <div class="stat-card">
                 <div class="stat-label">Administrators</div>
                 <div class="number"><?php echo $total_admins; ?></div>
-            </div>
-        </div>
-
-        <!-- Registered Students Table Card -->
-        <div class="content-card">
-            <div class="card-header">
-                <h2>Registered Students</h2>
-                
-                <!-- Student Search Form -->
-                <form method="GET" action="" class="search-box">
-                    <input type="text" name="student_search" placeholder="Search student name, username, email..." value="<?php echo htmlspecialchars($student_search); ?>">
-                    <button type="submit" class="btn primary-btn">Search</button>
-                    <?php if (!empty($student_search)): ?>
-                        <a href="admin_dashboard.php" class="btn secondary-btn">Clear</a>
-                    <?php endif; ?>
-                </form>
-            </div>
-
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Username</th>
-                            <th>Email</th>
-                            <th>Phone No</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if ($students->num_rows > 0): ?>
-                            <?php while ($row = $students->fetch_assoc()): ?>
-                                <tr>
-                                    <td>#<?php echo htmlspecialchars($row['id']); ?></td>
-                                    <td><strong><?php echo htmlspecialchars($row['name']); ?></strong></td>
-                                    <td><?php echo htmlspecialchars($row['username']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['email']); ?></td>
-                                    <td><?php echo htmlspecialchars($row['phone'] ?? 'N/A'); ?></td>
-                                    <td>
-                                        <a href="admin_dashboard.php?delete_id=<?php echo $row['id']; ?>" class="action-link btn-delete" onclick="return confirm('Are you sure you want to delete this student permanently from database?');">Delete</a>
-                                    </td>
-                                </tr>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="6" class="no-data">No students found matching your criteria.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Faculty Members Table Card -->
-        <div class="content-card">
-            <div class="card-header">
-                <h2>Faculty Directory</h2>
-                
-                <!-- Faculty Search Form -->
-                <form method="GET" action="" class="search-box">
-                    <input type="text" name="faculty_search" placeholder="Search faculty name, email..." value="<?php echo htmlspecialchars($faculty_search); ?>">
-                    <button type="submit" class="btn primary-btn">Search</button>
-                    <?php if (!empty($faculty_search)): ?>
-                        <a href="admin_dashboard.php" class="btn secondary-btn">Clear</a>
-                    <?php endif; ?>
-                </form>
-            </div>
-
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if ($faculty_members->num_rows > 0): ?>
-                            <?php while ($row = $faculty_members->fetch_assoc()): ?>
-                                <tr>
-                                    <td>#<?php echo htmlspecialchars($row['id']); ?></td>
-                                    <td><strong><?php echo htmlspecialchars($row['name']); ?></strong></td>
-                                    <td><?php echo htmlspecialchars($row['email']); ?></td>
-                                </tr>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="3" class="no-data">No faculty members found matching your criteria.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
             </div>
         </div>
 

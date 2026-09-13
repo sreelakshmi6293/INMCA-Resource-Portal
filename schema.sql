@@ -11,3 +11,13 @@ CREATE TABLE IF NOT EXISTS student_register (
     role VARCHAR(20) NOT NULL DEFAULT 'student',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE resources (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    semester INT NOT NULL,
+    subject VARCHAR(100) NOT NULL,
+    resource_type VARCHAR(50) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    uploaded_by INT,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
