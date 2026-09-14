@@ -17,7 +17,7 @@ if (file_exists('vendor/autoload.php')) {
     die("PHPMailer files not found. Please install PHPMailer via Composer or place it in the project directory.");
 }
 
-// Security Check: Admin role validation (Redirects to unified login page)
+// Security Check: Admin role validation
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: login.php");
     exit;
@@ -131,8 +131,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Fetch all registered faculty members
+// Fetch all registered faculty members for real-time client-side search
 $faculty_list = $conn->query("SELECT id, name, username, email, created_at FROM faculty ORDER BY id DESC");
+$total_faculty = $faculty_list ? $faculty_list->num_rows : 0;
 ?>
 
 <!DOCTYPE html>
@@ -146,9 +147,13 @@ $faculty_list = $conn->query("SELECT id, name, username, email, created_at FROM 
         body { background: #f4f6f9; padding: 30px; }
         .container { max-width: 1000px; margin: auto; }
         .card { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        h2 { color: #2d3748; margin-bottom: 20px; font-size: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .header-title-group { display: flex; align-items: center; gap: 12px; }
+        .faculty-count-badge { background-color: #ebf8ff; color: #3182ce; font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: 20px; border: 1px solid #3182ce; }
+        h2 { color: #2d3748; font-size: 20px; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: end; }
         input { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
+        input:focus { border-color: #3182ce; outline: none; }
         button { padding: 10px 20px; background: #3182ce; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         button:hover { background: #2b6cb0; }
         .alert { padding: 14px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; line-height: 1.4; }
@@ -160,6 +165,9 @@ $faculty_list = $conn->query("SELECT id, name, username, email, created_at FROM 
         th, td { text-align: left; padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
         th { background: #edf2f7; color: #4a5568; }
         a.back-btn { text-decoration: none; color: #4a5568; font-weight: 500; display: inline-block; margin-bottom: 15px; }
+        .search-box { display: flex; gap: 8px; align-items: center; }
+        .search-box input { width: 300px; padding: 8px 12px; }
+        .no-data { text-align: center; color: #a0aec0; padding: 20px; display: none; }
     </style>
 </head>
 <body>
@@ -202,7 +210,18 @@ $faculty_list = $conn->query("SELECT id, name, username, email, created_at FROM 
     </div>
 
     <div class="card">
-        <h2>Registered Faculty Accounts</h2>
+        <div class="card-header">
+            <div class="header-title-group">
+                <h2>Registered Faculty Accounts</h2>
+                <span class="faculty-count-badge" id="facultyCount">Total: <?php echo $total_faculty; ?></span>
+            </div>
+            
+            <!-- Real-time Faculty Search Input -->
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Type faculty name, username, email..." autocomplete="off">
+            </div>
+        </div>
+
         <table>
             <thead>
                 <tr>
@@ -214,19 +233,21 @@ $faculty_list = $conn->query("SELECT id, name, username, email, created_at FROM 
                 </tr>
             </thead>
             <tbody>
-                <?php if ($faculty_list && $faculty_list->num_rows > 0): ?>
+                <?php if ($total_faculty > 0): ?>
                     <?php while ($f = $faculty_list->fetch_assoc()): ?>
-                        <tr>
-                            <td><?php echo $f['id']; ?></td>
-                            <td><?php echo htmlspecialchars($f['name']); ?></td>
-                            <td><code><?php echo htmlspecialchars($f['username']); ?></code></td>
-                            <td><?php echo htmlspecialchars($f['email']); ?></td>
+                        <tr class="faculty-row">
+                            <td>#<?php echo $f['id']; ?></td>
+                            <td class="faculty-name"><strong><?php echo htmlspecialchars($f['name']); ?></strong></td>
+                            <td class="faculty-username"><code><?php echo htmlspecialchars($f['username']); ?></code></td>
+                            <td class="faculty-email"><?php echo htmlspecialchars($f['email']); ?></td>
                             <td><?php echo date('d M Y', strtotime($f['created_at'])); ?></td>
                         </tr>
                     <?php endwhile; ?>
-                <?php else: ?>
-                    <tr><td colspan="5" style="text-align:center; color:#a0aec0;">No faculty accounts registered yet.</td></tr>
                 <?php endif; ?>
+                
+                <tr id="noResultsRow" class="no-data">
+                    <td colspan="5">No faculty accounts found matching your search.</td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -238,13 +259,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const emailInput = document.getElementById('faculty_email');
     const alertBanner = document.getElementById('alert-banner');
 
-    // 1. Clear input fields if a duplicate or error alert is currently displayed
+    // 1. Clear input fields if an alert is currently displayed
     <?php if ($has_alert): ?>
         if (nameInput) nameInput.value = '';
         if (emailInput) emailInput.value = '';
     <?php endif; ?>
 
-    // 2. Hide alert message when user modifies input
+    // 2. Hide alert message when user modifies form inputs
     const hideAlert = function () {
         if (alertBanner) {
             alertBanner.style.display = 'none';
@@ -253,6 +274,45 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (nameInput) nameInput.addEventListener('input', hideAlert);
     if (emailInput) emailInput.addEventListener('input', hideAlert);
+
+    // 3. Real-time Search and Counter Logic
+    const searchInput = document.getElementById('searchInput');
+    const rows = document.querySelectorAll('.faculty-row');
+    const noResultsRow = document.getElementById('noResultsRow');
+    const facultyCountBadge = document.getElementById('facultyCount');
+    const totalCount = rows.length;
+
+    searchInput.addEventListener('input', function () {
+        const query = this.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const name = row.querySelector('.faculty-name').textContent.toLowerCase();
+            const username = row.querySelector('.faculty-username').textContent.toLowerCase();
+            const email = row.querySelector('.faculty-email').textContent.toLowerCase();
+
+            if (name.includes(query) || username.includes(query) || email.includes(query)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Update badge text based on active filter
+        if (query === '') {
+            facultyCountBadge.textContent = `Total: ${totalCount}`;
+        } else {
+            facultyCountBadge.textContent = `Found: ${visibleCount}`;
+        }
+
+        // Toggle "No records found" row visibility
+        if (visibleCount === 0 && totalCount > 0) {
+            noResultsRow.style.display = 'table-row';
+        } else {
+            noResultsRow.style.display = 'none';
+        }
+    });
 });
 </script>
 
