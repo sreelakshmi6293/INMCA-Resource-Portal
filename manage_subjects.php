@@ -146,7 +146,6 @@ $total_resources = $resources ? $resources->num_rows : 0;
         <img src="logo (3).png" alt="INMCA Resource Portal Logo" class="footer-logo-img">
         <p>&copy; <?php echo date('Y'); ?> INMCA Resource Portal. All rights reserved.</p>
     </footer>
-
     <!-- Real-time Search and Filter Script -->
     <script>
     document.addEventListener('DOMContentLoaded', function () {
