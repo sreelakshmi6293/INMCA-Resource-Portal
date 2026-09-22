@@ -196,11 +196,11 @@ $total_faculty = $faculty_list ? $faculty_list->num_rows : 0;
             <div class="form-grid">
                 <div>
                     <label style="display:block; margin-bottom: 5px; font-size:13px; font-weight:600;">Faculty Full Name</label>
-                    <input type="text" id="faculty_name" name="name" placeholder="Dr. Sarah Connor" autocomplete="off" required>
+                    <input type="text" id="faculty_name" name="name" placeholder="Full Name" autocomplete="off" required>
                 </div>
                 <div>
                     <label style="display:block; margin-bottom: 5px; font-size:13px; font-weight:600;">Faculty Email Address</label>
-                    <input type="email" id="faculty_email" name="email" placeholder="sarah@college.edu" autocomplete="off" required>
+                    <input type="email" id="faculty_email" name="email" placeholder="Email Address" autocomplete="off" required>
                 </div>
                 <div>
                     <button type="submit">Assign & Send Email</button>
