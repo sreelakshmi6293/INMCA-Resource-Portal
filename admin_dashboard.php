@@ -81,7 +81,6 @@ $total_admins = $total_admins_query->fetch_assoc()['total'] ?? 0;
         </div>
     </header>
 
-    <!-- Main Content Container -->
     <div class="dashboard-container">
         
         <!-- Welcome Header -->

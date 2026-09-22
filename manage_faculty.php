@@ -131,7 +131,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Fetch all registered faculty members for real-time client-side search
 $faculty_list = $conn->query("SELECT id, name, username, email, created_at FROM faculty ORDER BY id DESC");
 $total_faculty = $faculty_list ? $faculty_list->num_rows : 0;
 ?>

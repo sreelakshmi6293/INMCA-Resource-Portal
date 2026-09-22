@@ -74,7 +74,6 @@ $total_students = $students ? $students->num_rows : 0;
         </div>
     </header>
 
-    <!-- Main Container -->
     <div class="dashboard-container">
         
         <?php if (isset($_GET['msg']) && $_GET['msg'] === 'student_deleted'): ?>
