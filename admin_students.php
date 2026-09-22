@@ -9,15 +9,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
 }
 
 // 2. Student Deletion Logic
-if (isset($_GET['delete_student_id']) && is_numeric($_GET['delete_student_id'])) {
-    $delete_id = intval($_GET['delete_student_id']);
-    $delete_stmt = $conn->prepare("DELETE FROM student_register WHERE id = ?");
-    $delete_stmt->bind_param("i", $delete_id);
-    if ($delete_stmt->execute()) {
-        header("Location: students.php?msg=student_deleted");
-        exit;
-    }
-}
+
 
 // 3. Fetch All Students (Real-time filtering will be handled on the client side)
 $student_sql = "SELECT id, name, username, email, `phone no` AS phone FROM student_register ORDER BY id DESC";
@@ -53,7 +45,7 @@ $total_students = $students ? $students->num_rows : 0;
         .search-box input:focus { border-color: #004ac6; }
         .btn { padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; border: none; cursor: pointer; display: inline-block; }
         .btn-sm { padding: 5px 10px; font-size: 13px; }
-        .btn-delete { background-color: #d92d20; color: white; }
+        
         .alert-success { background-color: #ecfdf3; color: #027a48; padding: 12px 20px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #abefc6; }
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
@@ -70,8 +62,8 @@ $total_students = $students ? $students->num_rows : 0;
     <header>
         <div class="navbar">
             <a href="admin_dashboard.php" class="logo">
-                <div class="logo-icon">A</div>
-                <span>AdminPortal</span>
+                 <img src="images/logo (3).png" alt="INMCA Resources Logo" class="logo-img">   
+                <span>INMCA Resource Portal</span> 
             </a>
             <ul class="nav-links">
                 <li><a href="admin_dashboard.php">Dashboard</a></li>
@@ -112,7 +104,6 @@ $total_students = $students ? $students->num_rows : 0;
                             <th>Username</th>
                             <th>Email</th>
                             <th>Phone No</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -124,9 +115,6 @@ $total_students = $students ? $students->num_rows : 0;
                                     <td class="student-username"><?php echo htmlspecialchars($row['username']); ?></td>
                                     <td class="student-email"><?php echo htmlspecialchars($row['email']); ?></td>
                                     <td><?php echo htmlspecialchars($row['phone'] ?? 'N/A'); ?></td>
-                                    <td>
-                                        <a href="students.php?delete_student_id=<?php echo $row['id']; ?>" class="btn btn-sm btn-delete" onclick="return confirm('Are you sure you want to delete this student permanently?');">Delete</a>
-                                    </td>
                                 </tr>
                             <?php endwhile; ?>
                         <?php endif; ?>
