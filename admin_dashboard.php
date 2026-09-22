@@ -69,9 +69,8 @@ $total_admins = $total_admins_query->fetch_assoc()['total'] ?? 0;
     <header>
         <div class="navbar">
             <a href="admin_dashboard.php" class="logo">
-                <div class="logo-icon">A</div>
-                <span>AdminPortal</span>
-            </a>
+             <img src="images/logo (3).png" alt="INMCA Resources Logo" class="logo-img">   
+                <span>INMCA Resource Portal</span>  
             <ul class="nav-links">
                 <li><a href="admin_dashboard.php" class="active">Dashboard</a></li>
                 <li><a href="admin_students.php">Students</a></li>
