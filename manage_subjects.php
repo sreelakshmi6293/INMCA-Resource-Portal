@@ -73,7 +73,7 @@ $total_resources = $resources ? $resources->num_rows : 0;
             </div>
             <ul class="nav-links">
                 <li><a href="admin_dashboard.php">Dashboard</a></li>
-                <li><a href="students.php">Students</a></li>
+                <li><a href="admin_students.php">Students</a></li>
                 <li><a href="manage_faculty.php">Faculty</a></li>
                 <li><a href="manage_subjects.php" class="active">Subjects</a></li>
                 <li><a href="logout.php" class="logout-btn">Logout</a></li>
