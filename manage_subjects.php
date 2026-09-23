@@ -4,14 +4,13 @@ require_once 'db.php';
 
 // 1. Strict Security Check: Verify user is logged in AND has 'admin' role
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header("Location: admin_login.php");
+    header("Location: login.php");
     exit;
 }
 
 // 2. Fetch all resources for real-time client-side search
 $sql = "SELECT id, semester, subject, resource_type, file_name, file_path, uploaded_by, uploaded_at FROM resources ORDER BY id DESC";
-$resources = $conn->query($sql);
-$total_resources = $resources ? $resources->num_rows : 0;
+$resources =$conn->query($sql);$total_resources = $resources ? $resources->num_rows : 0;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -23,36 +22,48 @@ $total_resources = $resources ? $resources->num_rows : 0;
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
         body { background-color: #f4f6f9; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* Navbar Styles */
         header { background-color: #ffffff; border-bottom: 1px solid #e1e4e8; width: 100%; }
         .navbar { max-width: 1200px; margin: 0 auto; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
         .nav-left { display: flex; align-items: center; gap: 15px; }
-        .back-btn { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; background-color: #f2f4f7; color: #344054; text-decoration: none; transition: all 0.2s ease; }
-        .back-btn:hover { background-color: #004ac6; color: #ffffff; }
-        .logo { display: flex; align-items: center; }
-        .logo-img { height: 48px; width: auto; object-fit: contain; }
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #004ac6; font-weight: bold; font-size: 18px; }
+        .logo-icon { background-color: #004ac6; color: #fff; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
         .nav-links { list-style: none; display: flex; align-items: center; gap: 20px; }
         .nav-links a { text-decoration: none; color: #596579; font-weight: 500; }
         .nav-links a.active, .nav-links a:hover { color: #004ac6; }
         .logout-btn { background-color: #f2f4f7; color: #344054; padding: 8px 14px; border-radius: 6px; font-size: 14px; font-weight: 500; }
-        .logout-btn:hover { background-color: #fee4e2; color: #d92d20; }
+        .logout-btn:hover {background-color: #e4e7ec; color: #004ac6;}
+
+        /* Dashboard Container & Cards */
         .dashboard-container { max-width: 1200px; width: 100%; margin: 30px auto; padding: 0 20px; flex: 1; }
         .content-card { background: #ffffff; border-radius: 8px; padding: 25px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; flex-wrap: wrap; gap: 15px; }
         .header-title-group { display: flex; align-items: center; gap: 12px; }
         .resource-count-badge { background-color: #e6f0ff; color: #004ac6; font-size: 14px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+        h2 { color: #2d3748; font-size: 20px; }
+
+        /* Search & Filter Controls */
         .search-box { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .search-box input, .search-box select { padding: 9px 14px; border: 1px solid #d0d5dd; border-radius: 6px; outline: none; font-size: 14px; transition: border-color 0.2s; }
         .search-box input:focus, .search-box select:focus { border-color: #004ac6; }
         .search-box input { width: 300px; }
+
+        /* Badges & Actions */
         .badge-type { background: #e6f0ff; color: #004ac6; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
         .badge-sem { background: #f2f4f7; color: #344054; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .action-link { color: #004ac6; font-weight: 600; text-decoration: none; font-size: 13px; }
+        .action-link:hover { text-decoration: underline; }
+
+        /* Data Tables */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        table th, table td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; }
+        table th, table td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
         table th { background-color: #f9fafb; color: #475467; font-weight: 600; }
         .no-data { text-align: center; color: #667085; padding: 20px; display: none; }
+
         footer { background-color: #ffffff; border-top: 1px solid #e1e4e8; padding: 20px; text-align: center; margin-top: auto; }
-        .footer-logo-img { height: 36px; width: auto; margin-bottom: 8px; }
+        .footer-logo { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold; color: #004ac6; }
     </style>
 </head>
 <body>
@@ -61,14 +72,9 @@ $total_resources = $resources ? $resources->num_rows : 0;
     <header>
         <div class="navbar">
             <div class="nav-left">
-                <a href="admin_dashboard.php" class="back-btn" title="Back to Admin Dashboard">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                </a>
                 <a href="admin_dashboard.php" class="logo">
-                    <img src="logo (3).png" alt="INMCA Resource Portal Logo" class="logo-img">
+                    <img src="images/logo (3).png" alt="INMCA Resource Portal Logo" class="logo-img">
+                    <span>INMCA Resource Portal</span>
                 </a>
             </div>
             <ul class="nav-links">
@@ -119,7 +125,7 @@ $total_resources = $resources ? $resources->num_rows : 0;
                     </thead>
                     <tbody>
                         <?php if ($total_resources > 0): ?>
-                            <?php while ($row = $resources->fetch_assoc()): ?>
+                            <?php while ($row =$resources->fetch_assoc()): ?>
                                 <tr class="resource-row" data-semester="<?php echo htmlspecialchars($row['semester']); ?>">
                                     <td><span class="badge-sem">Sem <?php echo htmlspecialchars($row['semester']); ?></span></td>
                                     <td class="resource-subject"><strong><?php echo htmlspecialchars($row['subject']); ?></strong></td>
@@ -132,7 +138,7 @@ $total_resources = $resources ? $resources->num_rows : 0;
                         <?php endif; ?>
 
                         <tr id="noResultsRow" class="no-data">
-                            <td colspan="6">No resource records found matching your search.</td>
+                            <td colspan="7">No resource records found matching your search.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -143,9 +149,13 @@ $total_resources = $resources ? $resources->num_rows : 0;
 
     <!-- Footer -->
     <footer>
-        <img src="logo (3).png" alt="INMCA Resource Portal Logo" class="footer-logo-img">
-        <p>&copy; <?php echo date('Y'); ?> INMCA Resource Portal. All rights reserved.</p>
+        <div class="footer-logo">
+            <div class="logo-icon">A</div>
+            <span>AdminPortal</span>
+        </div>
+        <p>&copy; <?php echo date('Y'); ?> Portal Management System. All rights reserved.</p>
     </footer>
+
     <!-- Real-time Search and Filter Script -->
     <script>
     document.addEventListener('DOMContentLoaded', function () {

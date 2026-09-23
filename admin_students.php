@@ -45,6 +45,21 @@ $total_students = $students ? $students->num_rows : 0;
         .search-box input:focus { border-color: #004ac6; }
         .btn { padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; border: none; cursor: pointer; display: inline-block; }
         .btn-sm { padding: 5px 10px; font-size: 13px; }
+
+                /* Updated Logout Button styling to match other nav links */
+        .logout-btn { 
+            background-color: #f2f4f7; 
+            color: #344054; 
+            padding: 8px 14px; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            transition: all 0.2s ease;
+        }
+        .logout-btn:hover { 
+            background-color: #e4e7ec; 
+            color: #004ac6; 
+        }
         
         .alert-success { background-color: #ecfdf3; color: #027a48; padding: 12px 20px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #abefc6; }
         .table-responsive { overflow-x: auto; }
@@ -70,6 +85,7 @@ $total_students = $students ? $students->num_rows : 0;
                 <li><a href="students.php" class="active">Students</a></li>
                 <li><a href="manage_faculty.php">Faculty</a></li>
                 <li><a href="manage_subjects.php">Subjects</a></li>
+                <li><a href="logout.php" class="logout-btn">Logout</a></li>
             </ul>
         </div>
     </header>
