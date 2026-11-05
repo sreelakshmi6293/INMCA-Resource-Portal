@@ -1,5 +1,4 @@
-# INMCA-Resource-Portal
-INMCA academic resource portal
+
 # INMCA Resource Portal
 
 A PHP and MySQL portal for INMCA students, faculty, and administrators. It also includes a Flask-based AI study assistant.
