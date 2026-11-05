@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Semester 1 - INMCA Resources</title>
+    <title>Semester 10 - INMCA Resources</title>
 
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -14,23 +14,23 @@
 <body>
 
     <!-- Navbar -->
-    <header>
-    
-        <nav class="navbar">
-
-            <div class="logo">
-                <img src="images/logo (3).png"
-                     alt="INMCA Resources Logo"
-                     class="logo-img">
-
-                <span>INMCA Resource Portal</span>
+    <header class="navbar">
+       
+      <a href="index.html" class="brand">
+           
+             <img src="images/logo.svg" alt="INMCA Resources Logo" > 
+             <div>  
+                <span class="brand-name">INMCA Resource Portal</span>
             </div>
+            </a>
 
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="student-dashboard.html">Dashboard</a>
-                <a href="#">Logout</a>
-            </div>
+            <nav class="nav-links">
+                
+                 <a id="back-link" href="student-dashboard.html" >
+                ← Back 
+              </a>
+                <a href="logout.php">Logout</a>
+            </nav>
 
         </nav>
     </header>
@@ -41,12 +41,12 @@
 
         <div class="sem1-heading">
 
-            <span>SEMESTER 01</span>
+            <span>SEMESTER 10</span>
 
-            <h1>Semester 1 Subjects</h1>
+            <h1>Semester 10 Subjects</h1>
 
             <p>
-                Select a subject to access notes, question papers and syllabus.
+                Select to access resources.
             </p>
 
         </div>
@@ -58,7 +58,7 @@
             <div class="sem1-subject-grid">
 
                 <!-- Subject 1 -->
-                <a href="#" class="sem1-subject-card">
+                <a href="resources.php?semester=10&subject=COMPREHENSIVE%20VIVA&type=Notes" class="sem1-subject-card">
 
                     <div class="sem1-subject-icon">
                         <span class="material-symbols-outlined">
@@ -68,8 +68,8 @@
 
                     <div>
             
-                        <h2>ENGLISH</h2>
-                        <p>20INMCA101</p>
+                        <h2>COMPREHENSIVE VIVA</h2>
+                        <p>20INMCA502</p>
                     </div>
 
                     <span class="sem1-arrow">→</span>
@@ -78,7 +78,7 @@
 
 
                 <!-- Subject 2 -->
-                <a href="#" class="sem1-subject-card">
+                <a href="resources.php?semester=10&subject=SEMINAR&type=Notes" class="sem1-subject-card">
 
                     <div class="sem1-subject-icon">
                         <span class="material-symbols-outlined">
@@ -87,8 +87,8 @@
                     </div>
 
                     <div>
-                        <h2>BASIC MATHEMATICS</h2>
-                        <p>20INMCA103</p>
+                        <h2>SEMINAR</h2>
+                        <p>20INMCA504</p>
                     </div>
 
                     <span class="sem1-arrow">→</span>
@@ -97,7 +97,7 @@
 
 
                 <!-- Subject 3 -->
-                <a href="#" class="sem1-subject-card">
+                <a href="resources.php?semester=10&subject=MAIN%20PROJECT&type=Notes" class="sem1-subject-card">
 
                     <div class="sem1-subject-icon">
                         <span class="material-symbols-outlined">
@@ -106,8 +106,8 @@
                     </div>
 
                     <div>
-                        <h2>INTRODUCTION TO PROGRAMMING</h2>
-                        <p>20INMCA105</p>
+                        <h2>MAIN PROJECT</h2>
+                        <p>20INMCA506</p>
                     </div>
 
                     <span class="sem1-arrow">→</span>
@@ -115,42 +115,9 @@
                 </a>
 
 
-                <!-- Subject 4 -->
-                <a href="#" class="sem1-subject-card">
+                
 
-                    <div class="sem1-subject-icon">
-                        <span class="material-symbols-outlined">
-                            4
-                        </span>
-                    </div>
-
-                    <div>
-                        <h2>INTRODUCTION TO COMPUTERS & PC HARDWARE</h2>
-                        <p>20INMCA107</p>
-                    </div>
-
-                    <span class="sem1-arrow">→</span>
-
-                </a>
-
-
-                <!-- Subject 5 -->
-                <a href="#" class="sem1-subject-card">
-
-                    <div class="sem1-subject-icon">
-                        <span class="material-symbols-outlined">
-                            5
-                        </span>
-                    </div>
-
-                    <div>
-                        <h2>FUNDAMENTALS OF ACCOUNTANCY</h2>
-                        <p>20INMCA109</p>
-                    </div>
-
-                    <span class="sem1-arrow">→</span>
-
-                </a>
+                
 
 
                
@@ -165,17 +132,103 @@
             </a>
         </div>
     </main>
+    
 
 
     <!-- Footer -->
     <footer>
 
         <p>
-            © 2026 INMCA Resources. Empowering Academic Excellence.
+             INMCA Resources. Empowering Academic Excellence.
         </p>
 
     </footer>
+<style>
+.resource-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
 
+.resource-box {
+    background: white;
+    width: 70%;
+    max-width: 300px;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    position: relative;
+}
+
+.resource-box h2 {
+    margin-bottom: 8px;
+}
+
+.resource-box p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.close-resource {
+    position: absolute;
+    top: 10px;
+    right: 18px;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.resource-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.resource-item {
+    display: block;
+    padding: 12px;
+    background: #f3f6ff;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #222;
+}
+
+.resource-item:hover {
+    background: #e2eaff;
+}
+
+.resource-item span {
+    display: inline;
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+</style>
+<script>
+    const from = new URLSearchParams(window.location.search).get('from');
+
+    // Subject links-il source parameter cherkkunnu
+    if (from === 'all' || from === 'student') {
+        document.querySelectorAll('a[href^="resources.php"]').forEach(link => {
+            const url = new URL(link.href);
+            url.searchParams.set('from', from);
+            link.href = url.href;
+        });
+    }
+
+    
+    const backTarget = from === 'all'
+        ? 'faculty_dashboard.php'
+        : 'student-dashboard.html';
+
+    document.getElementById('back-link').href = backTarget;
+    document.querySelector('.back-to-dashboard .primary-btn').href = backTarget;
+</script>
 </body>
 
 </html>

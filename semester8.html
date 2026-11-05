@@ -14,23 +14,23 @@
 <body>
 
     <!-- Navbar -->
-    <header>
-    
-        <nav class="navbar">
-
-            <div class="logo">
-                <img src="images/logo (3).png"
-                     alt="INMCA Resources Logo"
-                     class="logo-img">
-
-                <span>INMCA Resource Portal</span>
+    <header class="navbar">
+       
+      <a href="index.html" class="brand">
+           
+             <img src="images/logo.svg" alt="INMCA Resources Logo" > 
+             <div>  
+                <span class="brand-name">INMCA Resource Portal</span>
             </div>
+            </a>
 
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="student-dashboard.html">Dashboard</a>
-                <a href="#">Logout</a>
-            </div>
+            <nav class="nav-links">
+                
+                 <a id="back-link" href="student-dashboard.html" >
+                ← Back 
+              </a>
+                <a href="logout.php">Logout</a>
+            </nav>
 
         </nav>
     </header>
@@ -58,7 +58,8 @@
             <div class="sem1-subject-grid">
 
                 <!-- Subject 1 -->
-                <a href="#" class="sem1-subject-card">
+                <div class="sem1-subject-card"
+                     onclick="openResources('ADVANCED DATABASE MANAGEMENT SYSTEMS')" style="cursor: pointer;">
 
                     <div class="sem1-subject-icon">
                         <span class="material-symbols-outlined">
@@ -74,11 +75,12 @@
 
                     <span class="sem1-arrow">→</span>
 
-                </a>
+                </div>
 
 
                 <!-- Subject 2 -->
-                <a href="#" class="sem1-subject-card">
+                <div class="sem1-subject-card"
+                     onclick="openResources('ADVANCED COMPUTER NETWORKS')" style="cursor: pointer;">
 
                     <div class="sem1-subject-icon">
                         <span class="material-symbols-outlined">
@@ -93,11 +95,12 @@
 
                     <span class="sem1-arrow">→</span>
 
-                </a>
+                </div>
 
 
                 <!-- Subject 3 -->
-                <a href="#" class="sem1-subject-card">
+                <div class="sem1-subject-card"
+                     onclick="openResources('RESEARCH METHODOLOGY')" style="cursor: pointer;">
 
                     <div class="sem1-subject-icon">
                         <span class="material-symbols-outlined">
@@ -112,11 +115,12 @@
 
                     <span class="sem1-arrow">→</span>
 
-                </a>
+                </div>
 
 
                 <!-- Subject 4 -->
-                <a href="#" class="sem1-subject-card">
+                <div class="sem1-subject-card"
+                     onclick="openResources('ORGANIZATIONAL BEHAVIOUR')" style="cursor: pointer;">
 
                     <div class="sem1-subject-icon">
                         <span class="material-symbols-outlined">
@@ -131,11 +135,12 @@
 
                     <span class="sem1-arrow">→</span>
 
-                </a>
+                </div>
 
 
                 <!-- Subject 5 -->
-                <a href="#" class="sem1-subject-card">
+                <div class="sem1-subject-card"
+                     onclick="openResources('ARTIFICIAL INTELLIGENCE')" style="cursor: pointer;">
 
                     <div class="sem1-subject-icon">
                         <span class="material-symbols-outlined">
@@ -150,7 +155,7 @@
 
                     <span class="sem1-arrow">→</span>
 
-                </a>
+                </div>
 
 
                
@@ -165,7 +170,74 @@
             </a>
         </div>
     </main>
+<!-- Resource Popup -->
+<div id="resourcePopup" class="resource-popup">
 
+    <div class="resource-box">
+
+        <span class="close-resource"
+              onclick="document.getElementById('resourcePopup').style.display='none'">
+            &times;
+        </span>
+
+        <h2 id="resourceTitle" style="font-size: 18px; margin-bottom: 10px;">Resources</h2>
+
+        <p>Select the type of resource you want.</p>
+
+        <div class="resource-list">
+
+            <a href="#" id="notesLink" class="resource-item">
+                <span>📚</span>
+                <strong>Notes</strong>
+            </a>
+
+            <a href="#" id="syllabusLink" class="resource-item">
+                <span>📖</span>
+                <strong>Syllabus</strong>
+            </a>
+
+            <a href="#" id="questionLink" class="resource-item">
+                <span>📝</span>
+                <strong>Question Papers</strong>
+            </a>
+
+            
+
+        </div>
+
+    </div>
+
+</div>
+  <script>
+
+function openResources(subjectName) {
+    const from = new URLSearchParams(window.location.search).get('from');
+    const params = new URLSearchParams({
+        semester: '8',
+        subject: subjectName
+    });
+
+    if (from === 'all' || from === 'student') {
+        params.set('from', from);
+    }
+
+    document.getElementById("resourceTitle").innerText =
+        subjectName + " Resources";
+
+    document.getElementById("notesLink").href =
+        "resources.php?" + params.toString() + "&type=Notes";
+
+    document.getElementById("syllabusLink").href =
+        "resources.php?" + params.toString() + "&type=Syllabus";
+
+    document.getElementById("questionLink").href =
+        "resources.php?" + params.toString() +
+        "&type=" + encodeURIComponent("Question Papers");
+
+    document.getElementById("resourcePopup").style.display = "flex";
+}
+
+</script>
 
     <!-- Footer -->
     <footer>
@@ -175,7 +247,82 @@
         </p>
 
     </footer>
+<style>
+.resource-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
 
+.resource-box {
+    background: white;
+    width: 70%;
+    max-width: 300px;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    position: relative;
+}
+
+.resource-box h2 {
+    margin-bottom: 8px;
+}
+
+.resource-box p {
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.close-resource {
+    position: absolute;
+    top: 10px;
+    right: 18px;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.resource-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.resource-item {
+    display: block;
+    padding: 12px;
+    background: #f3f6ff;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #222;
+}
+
+.resource-item:hover {
+    background: #e2eaff;
+}
+
+.resource-item span {
+    display: inline;
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+</style>
+<script>
+    const from = new URLSearchParams(window.location.search).get('from');
+    const backLink = document.getElementById('back-link');
+
+    if (backLink) {
+        backLink.href = from === 'all'
+            ? 'faculty_dashboard.php'
+            : 'student-dashboard.html';
+    }
+</script>
 </body>
 
 </html>

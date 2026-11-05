@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($error)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reset Password</title>
-    <style>
+   <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         body { background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         .card { background: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($error)) {
         .password-wrapper { position: relative; display: flex; align-items: center; }
         .password-wrapper input { padding-right: 42px !important; }
         .toggle-password { position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #718096; padding: 4px; }
-    </style>
+    </style> 
 </head>
 <body>
 

@@ -13,25 +13,44 @@
 
 <body>
 
-    <header>
-        <nav class="navbar">
+    
+<header class="navbar">
 
-            <div class="logo">
-                <img src="images/logo (3).png"
-                     alt="INMCA Resources Logo"
-                     class="logo-img">
+    <a href="student-dashboard.html" class="brand">
 
-                <span>INMCA Resource Portal</span>
-            </div>
+        <img src="images/logo.svg" alt="INMCA Logo">
 
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="student-dashboard.html">Dashboard</a>
-                <a href="logout.php">Logout</a>
-            </div>
+        <div>
+            <span class="brand-name">
+                INMCA Resources Portal
+            </span>
 
-        </nav>
-    </header>
+            <span class="student-badge">
+                Student
+            </span>
+        </div>
+
+    </a>
+
+    <nav class="nav-links">
+
+        <a href="index.html">
+            Home
+        </a>
+
+        <a href="ai-assistant.php" class="ai-button">
+            🤖 AI Assistant
+        </a>
+
+        <a href="logout.php" class="logout">
+            Logout
+        </a>
+
+    </nav>
+
+</header>
+
+
 
 
     <main class="semester-page">
@@ -45,18 +64,23 @@
                 Choose a semester to explore its subjects and resources.
             </p>
         </div>
+<div class="semester-search">
+    <input type="text" id="subjectSearch" placeholder="Search subject...">
+    <button onclick="searchSubject()">Search</button>
+</div>
 
+<p id="searchMessage"></p>
 
         <div class="semester-grid">
 
-            <a href="semester1.html" class="semester-card">
+            <a href="semester1.html?from=student" class="semester-card">
                 <div class="semester-icon">
                     <span class="material-symbols-outlined">menu_book </span>
                 </div>
                 <h2>Semester 1</h2>
             </a>
 
-            <a href="semester2.html" class="semester-card">
+            <a href="semester2.html?from=student" class="semester-card">
                 <div class="semester-icon">
                     <span class="material-symbols-outlined"> school</span>
 
@@ -64,56 +88,56 @@
                 <h2>Semester 2</h2>
             </a>
 
-            <a href="semester3.html" class="semester-card">
+            <a href="semester3.html?from=student" class="semester-card">
                 <div class="semester-icon">
                     <span class="material-symbols-outlined">code </span>
                 </div>
                 <h2>Semester 3</h2>
             </a>
 
-            <a href="semester4.html" class="semester-card">
+            <a href="semester4.html?from=student" class="semester-card">
                 <div class="semester-icon">
                     <span class="material-symbols-outlined">computer </span>
                 </div>
                 <h2>Semester 4</h2>
             </a>
 
-            <a href="semester5.html" class="semester-card">
+            <a href="semester5.html?from=student" class="semester-card">
                 <div class="semester-icon">
                     <span class="material-symbols-outlined">database </span>
                 </div>
                 <h2>Semester 5</h2>
             </a>
 
-            <a href="semester6.html" class="semester-card">
+            <a href="semester6.html?from=student" class="semester-card">
                 <div class="semester-icon">
                     <span class="material-symbols-outlined">analytics </span>
                 </div>
                 <h2>Semester 6</h2>
             </a>
 
-            <a href="semester7.html" class="semester-card">
+            <a href="semester7.html?from=student" class="semester-card">
                 <div class="semester-icon">
                     <span class="material-symbols-outlined">insights </span>
                 </div>
                 <h2>Semester 7</h2>
             </a>
 
-            <a href="semester8.html" class="semester-card">
+            <a href="semester8.html?from=student" class="semester-card">
                 <div class="semester-icon">
                     <span class="material-symbols-outlined">auto_stories </span>
                 </div>
                 <h2>Semester 8</h2>
             </a>
 
-            <a href="semester9.html" class="semester-card">
+            <a href="semester9.html?from=student" class="semester-card">
                 <div class="semester-icon">
                     <span class="material-symbols-outlined">developer_mode </span>
                 </div>
                 <h2>Semester 9</h2>
             </a>
 
-            <a href="semester10.html" class="semester-card">
+            <a href="semester10.html?from=student" class="semester-card">
                 <div class="semester-icon">
                     <span class="material-symbols-outlined">workspace_premium </span>
                 </div>
@@ -123,6 +147,234 @@
         </div>
 
     </main>
+<script>
+function searchSubject() {
 
+    const search = document.getElementById("subjectSearch")
+        .value.trim().toLowerCase();
+
+    const subjects = {
+
+        "1": [
+            "english",
+            "basic mathematics",
+            "introduction to programming",
+            "introduction to computers & pc hardware",
+            "fundamentals of accountancy",
+            "icph","ICPH",
+            "bm","BM",
+            "ip","IP",
+            "fa","FA"
+
+        ],
+
+        "2": ["technical communication",
+               "tc","TC",
+           "discrete mathematics",
+           "introduction to digital systems and logic designs",
+           "problem solving and structured programming",
+           "personality development and soft skills",
+           "dm","DM",
+           "DSL","dsl",
+           "sp","SP",
+           "pdss","PDSS"
+
+        ],
+
+        "3": [
+            "computer organization",
+            "probability and statistics",
+            "introduction to object oriented programming",
+            "accounting and financial management",
+            "data structures",
+            "co","CO",
+            "ps","PS",
+            "oop","OOP",
+            "afm","AFM",
+            "ds","DS"
+        ],
+
+        "4": [
+            "linux/unix fundamentals",
+            "statistical applications",
+            "operating systems",
+            "elements of bussiness management",
+            "internet concepts and web technology",
+            "linux","LINUX",
+            "sa","SA",
+            "os","OS",
+            "ebm","EBM",
+            "icwt","ICWT"
+        ],
+
+        "5": [
+            "numerical methods",
+            "user interface design",
+            "introduction to rdbms and sql",
+            "fundamentals of information systems security",
+            "introduction to operations research",
+            "nm","NM",
+            "uid","UID",
+            "rdbms","RDBMS",
+            "fiss","FISS",
+            "OR","or"
+        ],
+
+        "6": [
+            "introduction to software engineering",
+            "fundamentals of data science",
+            "visual programming",
+            "design and analysis of algorithms",
+            "mini project 1",
+            "SE","se",
+            "ds","DS",
+            "vp","VP",
+            "DAA","daa"
+        ],
+
+        "7": [
+            "m-commerce",
+            "java programming",
+            "advanced web programming",
+            "advanced software engineering",
+            "distributed computing",
+            "m.com","M.COM",
+            "JP","jp",
+            "awp","AWP",
+            "ASE","ase",
+            "dc","DC"
+
+        ],
+
+        "8": [
+            "advanced database management systems",
+            "advanced computer networks",
+            "research methodology",
+            "organizational behaviour",
+            "artificial intelligence",
+            "ADBMS","adbms",
+            "ACN","acn",
+            "AI","ai",
+            "rm","RM"
+
+        ],
+
+        "9": [
+            "DSML","dsml",
+            "data science & machine learning",
+            "mobile computing",
+            "mc","MC",
+            "cyber forensics",
+            "cf","CF",
+            "social network analysis",
+            "sna","SNA",
+            "mini project 2"
+        ],
+
+        "10": [
+            "main project",
+            "comprahensive viva",
+            "seminar"
+        ]
+    };
+
+    if (search === "") {
+        document.getElementById("searchMessage").innerText =
+            "Please enter a subject name.";
+        return;
+    }
+
+    for (const semester in subjects) {
+
+        const found = subjects[semester].some(subject =>
+            subject.includes(search)
+        );
+
+        if (found) {
+            window.location.href =
+                "semester" + semester + ".html";
+            return;
+        }
+    }
+
+    const message = document.getElementById("searchMessage");
+    message.innerText = "Subject not found.";
+    message.style.color = "red";
+    message.style.textAlign = "center";
+}
+</script>
+<footer>
+
+        <p>
+            &copy;2026 INMCA Resources. Empowering Academic Excellence.
+        </p>
+
+    </footer>
+
+    <style>
+
+.ai-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    padding: 12px 24px;
+    background: #a9c3f9;
+    color: white;
+
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+
+    border-radius: 8px;
+    border: none;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.ai-button:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}    
+.semester-search {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 25px auto;
+}
+
+.semester-search input {
+    width: 300px;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+}
+
+.semester-search input:focus {
+    border-color: #555;
+}
+
+.semester-search button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.searchMessage {
+    text-align: center;
+    font-size: 14px;
+    margin-top: -10px;
+    
+}
+</style>
+
+</body>
 </body>
 </html>

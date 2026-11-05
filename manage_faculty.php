@@ -67,11 +67,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) &&$_POST['a
         
         // 1. CROSS-TABLE DUPLICATE CHECK: Query both 'faculty' AND 'student_register' tables
         $check_stmt =$conn->prepare("
-            SELECT email, name, 'faculty' AS account_type FROM faculty WHERE email = ? OR name = ?
+            SELECT email, name, 'faculty' AS account_type FROM faculty WHERE email = ?
             UNION
-            SELECT email, name, 'student' AS account_type FROM student_register WHERE email = ? OR name = ?
+            SELECT email, name, 'student' AS account_type FROM student_register WHERE email = ?
         ");
-        $check_stmt->bind_param("ssss", $email, $name,$email, $name);$check_stmt->execute();
+        $check_stmt->bind_param("ss", $email, $email);
+        $check_stmt->execute();
         $check_result =$check_stmt->get_result();
 
         if ($check_result->num_rows > 0) {$existing_user = $check_result->fetch_assoc();$has_alert = true;
@@ -163,28 +164,95 @@ $total_faculty = $faculty_list ? $faculty_list->num_rows : 0;
         
         /* Navbar Styles */
         header { background-color: #ffffff; border-bottom: 1px solid #e1e4e8; width: 100%; }
-        .navbar { max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #004ac6; font-weight: bold; font-size: 18px; }
-        .logo-icon { background-color: #004ac6; color: #fff; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-        .nav-links { list-style: none; display: flex; align-items: center; gap: 20px; }
-        .nav-links a { text-decoration: none; color: #596579; font-weight: 500; }
-        .nav-links a.active, .nav-links a:hover { color: #004ac6; }
+        
         
         /* Logout Button Style */
         /* Updated Logout Button styling to match other nav links */
-        .logout-btn { 
-            background-color: #f2f4f7; 
-            color: #344054; 
-            padding: 8px 14px; 
-            border-radius: 6px; 
-            font-size: 14px; 
-            font-weight: 500; 
-            transition: all 0.2s ease;
+        .navbar {
+            height: 74px;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 45px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
         }
-        .logout-btn:hover { 
-            background-color: #e4e7ec; 
-            color: #004ac6; 
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            text-decoration: none;
         }
+
+        .brand img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .admin-badge {
+            margin-left: 8px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2563eb;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #475569;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 9px 15px;
+            border-radius: 9px;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #2563eb;
+            background: #f1f5f9;
+        }
+
+        .nav-links a.active {
+            color: #2563eb;
+            background: #eff6ff;
+            font-weight: 600;
+        }
+
+        .logout {
+            margin-left: 8px;
+            color: #dc2626 !important;
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+        }
+
+        .logout:hover {
+            background: #fee2e2 !important;
+            color: #b91c1c !important;
+        }
+
 
         /* Dashboard Container & Content Cards */
         .dashboard-container { max-width: 1200px; width: 100%; margin: 30px auto; padding: 0 20px; flex: 1; }
@@ -206,7 +274,7 @@ $total_faculty = $faculty_list ? $faculty_list->num_rows : 0;
         .alert-success { background-color: #ecfdf3; color: #027a48; border: 1px solid #abefc6; }
         .alert-warning { background-color: #feebc8; color: #742a2a; border: 1px solid #fbd38d; }
         .alert-danger { background-color: #fed7d7; color: #9b2c2c; border: 1px solid #feb2b2; }
-        .cred-box { background: #e6f0ff; border-left: 4px solid #004ac6; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .cred-box { background: #e6f0ff; border-left: 4px solid #004ac6; padding: 15px; margin-bottom: 20px; border-radius: 4px;transition: opacity 0.5s ease; }
 
         /* Data Tables & Buttons */
         .search-box { display: flex; align-items: center; gap: 10px; }
@@ -237,24 +305,104 @@ $total_faculty = $faculty_list ? $faculty_list->num_rows : 0;
         /* Footer */
         footer { background-color: #ffffff; border-top: 1px solid #e1e4e8; padding: 20px; text-align: center; margin-top: auto; }
         .footer-logo { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold; color: #004ac6; }
+        @media (max-width: 600px) {
+    .navbar {
+        height: auto;
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .brand {
+        gap: 8px;
+    }
+
+    .brand img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .brand-name {
+        font-size: 15px;
+    }
+
+    .nav-links {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 4px;
+    }
+
+    .nav-links a {
+        padding: 7px 9px;
+        font-size: 12px;
+    }
+
+    .logout {
+        margin-left: 0;
+    }
+
+    .dashboard-container {
+        margin: 18px auto;
+        padding: 0 12px;
+    }
+
+    .content-card {
+        padding: 14px;
+    }
+
+    .card-header {
+        align-items: flex-start;
+    }
+
+    .header-title-group {
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .search-box input {
+        width: 100%;
+    }
+
+    .table-responsive {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 650px;
+    }
+
+    table th,
+    table td {
+        padding: 9px 10px;
+        font-size: 12px;
+    }
+}
     </style>
 </head>
 <body>
 
     <!-- Header / Navbar -->
-    <header>
-        <div class="navbar">
-            <a href="admin_dashboard.php" class="logo">
-                <img src="images/logo (3).png" alt="INMCA Resources Logo" class="logo-img">   
-                <span>INMCA Resource Portal</span> 
+    <header class="navbar">
+        
+            <a href="admin_dashboard.php" class="brand">
+                <img src="images/logo.svg" alt="INMCA Resources Logo" >
+                <div>   
+                <span class="brand-name">INMCA Resource Portal</span>
+                <span class="admin-badge">Admin</span>
+            </div>
             </a>
-            <ul class="nav-links">
-                <li><a href="admin_dashboard.php">Dashboard</a></li>
-                <li><a href="admin_students.php">Students</a></li>
-                <li><a href="manage_faculty.php" class="active">Faculty</a></li>
-                <li><a href="manage_subjects.php">Subjects</a></li>
-                <li><a href="logout.php" class="btn-logout">Logout</a></li>
-            </ul>
+            <nav class="nav-links">
+                <a href="admin_dashboard.php">Dashboard</a>
+                <a href="admin_students.php">Students</a>
+                <a href="manage_faculty.php" class="active">Faculty</a>
+                <a href="manage_subjects.php">Subjects</a>
+                <a href="logout.php" class="logout">Logout</a>
+            </nav>
         </div>
     </header>
 
@@ -271,8 +419,7 @@ $total_faculty = $faculty_list ? $faculty_list->num_rows : 0;
                 <div class="cred-box">
                     <h4 style="color:#004ac6; margin-bottom: 8px;">Generated Account Information:</h4>
                     <p><strong>Faculty Name:</strong> <?php echo htmlspecialchars($assigned_credentials['name']); ?></p>
-                    <p><strong>Assigned Username:</strong> <code><?php echo htmlspecialchars($assigned_credentials['username']); ?></code></p>
-                    <p><strong>Assigned Password:</strong> <code><?php echo htmlspecialchars($assigned_credentials['password']); ?></code></p>
+                
                     <p><strong>Notification Sent To:</strong> <?php echo htmlspecialchars($assigned_credentials['email']); ?></p>
                 </div>
             <?php endif; ?>
@@ -364,11 +511,8 @@ $total_faculty = $faculty_list ? $faculty_list->num_rows : 0;
 
     <!-- Footer -->
     <footer>
-        <div class="footer-logo">
-            <div class="logo-icon">A</div>
-            <span>AdminPortal</span>
-        </div>
-        <p>&copy; <?php echo date('Y'); ?> Portal Management System. All rights reserved.</p>
+       
+        <p>&copy; <?php echo date('Y'); ?> INMCA Resource Portal. Empowering Academic Excellence.</p>
     </footer>
 
     <!-- Client-Side Search and Script Logic -->
@@ -404,6 +548,17 @@ $total_faculty = $faculty_list ? $faculty_list->num_rows : 0;
                     alertBanner.style.display = 'none';
                 }, 500); // smooth fade out duration
             }, 4000);
+        }
+        const credBox = document.querySelector('.cred-box');
+
+       if (credBox) {
+            setTimeout(function () {
+             credBox.style.opacity = '0';
+
+              setTimeout(function () {
+                  credBox.style.display = 'none';
+               }, 500);
+           }, 8000);
         }
 
         // 1. Clear input fields if an alert is currently displayed

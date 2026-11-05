@@ -14,28 +14,30 @@
 <body>
 
     <!-- Navbar -->
-    <header>
-    
-        <nav class="navbar">
-
-            <div class="logo">
-                <img src="images/logo (3).png"
-                     alt="INMCA Resources Logo"
-                     class="logo-img">
-
-                <span>INMCA Resource Portal</span>
+    <header class="navbar">
+       
+      <a href="index.html" class="brand">
+           
+             <img src="images/logo.svg" alt="INMCA Resources Logo" > 
+             <div>  
+                <span class="brand-name">INMCA Resource Portal</span>
             </div>
+            </a>
 
-            <div class="nav-links">
-                <a href="index.html">Home</a>
-                <a href="student-dashboard.html">Dashboard</a>
-                <a href="#">Logout</a>
-            </div>
-
-        </nav>
+            <nav class="nav-links">
+               
+                 <a id="back-link" href="student-dashboard.html" >
+                ← Back 
+              </a>
+                <a href="logout.php">Logout</a>
+               
+        
+           </nav>
+           
+        
     </header>
 
-
+      
     <!-- Main Content -->
     <main class="sem1-page">
 
@@ -50,7 +52,7 @@
             </p>
 
         </div>
-
+         
 
         <!-- Subjects -->
         <section class="subjects-section">
@@ -161,14 +163,10 @@
                
 
             </div>
-
+          
         </section>
 
-        <div class="back-to-dashboard">
-            <a href="student-dashboard.html" class="primary-btn">
-                ← Back 
-            </a>
-        </div>
+        
     </main>
 
 <!-- Resource Popup -->
@@ -181,7 +179,7 @@
             &times;
         </span>
 
-        <h2 id="resourceTitle">Resources</h2>
+        <h2 id="resourceTitle" style="font-size: 18px; margin-bottom: 10px;">Resources</h2>
 
         <p>Select the type of resource you want.</p>
 
@@ -209,26 +207,34 @@
     </div>
 
 </div>
+
+
+    
   <script>
 
 function openResources(subjectName) {
+    const from = new URLSearchParams(window.location.search).get('from');
+    const params = new URLSearchParams({
+        semester: '1',
+        subject: subjectName
+    });
+
+    if (from === 'all' || from === 'student') {
+        params.set('from', from);
+    }
 
     document.getElementById("resourceTitle").innerText =
         subjectName + " Resources";
 
-    const subject = encodeURIComponent(subjectName);
-
     document.getElementById("notesLink").href =
-        "resources.php?semester=1&subject=" + subject + "&type=Notes";
+        "resources.php?" + params.toString() + "&type=Notes";
 
     document.getElementById("syllabusLink").href =
-        "resources.php?semester=1&subject=" + subject + "&type=Syllabus";
+        "resources.php?" + params.toString() + "&type=Syllabus";
 
     document.getElementById("questionLink").href =
-        "resources.php?semester=1&subject=" + subject +
+        "resources.php?" + params.toString() +
         "&type=" + encodeURIComponent("Question Papers");
-
-    
 
     document.getElementById("resourcePopup").style.display = "flex";
 }
@@ -237,7 +243,7 @@ function openResources(subjectName) {
     <footer>
 
         <p>
-            © 2026 INMCA Resources. Empowering Academic Excellence.
+            &copy;2026 INMCA Resources. Empowering Academic Excellence.
         </p>
 
     </footer>
@@ -309,7 +315,16 @@ function openResources(subjectName) {
 }
 </style>
 
+<script>
+    const from = new URLSearchParams(window.location.search).get('from');
+    const backLink = document.getElementById('back-link');
 
+    if (backLink) {
+        backLink.href = from === 'all'
+            ? 'faculty_dashboard.php'
+            : 'student-dashboard.html';
+    }
+</script>
 </body>
 
 </html>

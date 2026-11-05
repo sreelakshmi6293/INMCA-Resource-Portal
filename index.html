@@ -7,25 +7,28 @@
     <title>INMCA  Resources Portal</title>
 
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
     <!-- Navigation Bar -->
-    <header>
-        <nav class="navbar">
-
-            <div class="logo">
-             <img src="images/logo (3).png" alt="INMCA Resources Logo" class="logo-img">   
-                <span>INMCA Resource Portal</span>
+    <header class="navbar">
+       
+      <a href="index.html" class="brand">
+           
+             <img src="images/logo.svg" alt="INMCA Resources Logo" > 
+             <div>  
+                <span class="brand-name">INMCA Resource Portal</span>
             </div>
+            </a>
 
-            <ul class="nav-links">
-                <li><a href="#" class="active">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#resources">Resources</a></li>
-                <li><a href="login.php">Login</a></li>
-            </ul>
+            <nav class="nav-links">
+                <a href="#" class="active">Home</a>
+                <a href="#about">About</a>
+                <a href="#resources">Resources</a>
+                <a href="login.php">Login</a>
+            </nav>
 
         </nav>
     </header>
@@ -92,7 +95,9 @@
             <div class="feature-container">
 
                 <div class="feature-card">
-                    <div class="feature-icon">📚</div>
+                    <span class="material-symbols-outlined feature-icon">
+                        book
+                    </span>
                     <h3>Notes</h3>
                     <p>
                         Access semester-wise and subject-wise study notes.
@@ -102,7 +107,9 @@
 
 
                 <div class="feature-card">
-                    <div class="feature-icon">📝</div>
+                    <span class="material-symbols-outlined feature-icon">
+                        edit
+                    </span>
                     <h3>Question Papers</h3>
                     <p>
                         Find previous year and important question papers.
@@ -112,7 +119,9 @@
 
 
                 <div class="feature-card">
-                    <div class="feature-icon">📖</div>
+                    <span class="material-symbols-outlined feature-icon">
+                        menu_book
+                    </span>
                     <h3>Syllabus</h3>
                     <p>
                         View complete semester-wise syllabus and subjects.
@@ -122,7 +131,9 @@
 
 
                 <div class="feature-card ai-card">
-                    <div class="feature-icon">✨</div>
+                    <span class="material-symbols-outlined feature-icon">
+                        auto_awesome
+                    </span>
                     <h3>AI Study Assistant</h3>
                     <p>
                         Get important questions and quick revision support.
@@ -155,10 +166,7 @@
                     resources.
                 </p>
 
-                <a href="#resources" class="btn primary-btn">
-                    Explore Resources
-                </a>
-
+               
             </div>
 
         </section>
@@ -192,9 +200,9 @@
         </p>
 
         <div class="footer-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Contact</a>
-            <a href="#">Support</a>
+            <a href="privacy.html">Privacy Policy</a>
+            <a href="contact.html">Contact</a>
+            <a href="support.html">Support</a>
         </div>
 
     </footer>

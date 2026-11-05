@@ -10,7 +10,7 @@ html {
 
 body {
     font-family: Arial, sans-serif;
-    background: #f8f9ff;
+    background: #e8eaf6;
     color: #0b1c30;
     line-height: 1.6;
 }
@@ -21,55 +21,131 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(249, 249, 252, 0.95);
     border-bottom: 1px solid #e3e7f0;
 }
 
 .navbar {
-    max-width: 1200px;
-    margin: auto;
-    padding: 18px 30px;
+    height: 74px;
+    background: #ffffff;
+
+    border-bottom: 1px solid #e2e8f0;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    padding: 0 45px;
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
 }
 
-.logo {
+
+/* Logo + Portal Name */
+
+.brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 13px;
 
-    color: #004ac6;
-    font-size: 21px;
-    font-weight: bold;
+    text-decoration: none;
 }
 
-.logo-img {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 50;
-    border:2px solid #004ac6;
-    padding: 2px;
+.brand img {
+    width: 44px;
+    height: 44px;
+
+    object-fit: contain;
+    border-radius: 8px;
 }
+
+.brand-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+
+/* Student Badge */
+
+.student-badge {
+    margin-left: 8px;
+
+    padding: 4px 10px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    color: #2563eb;
+    background: #eff6ff;
+
+    border: 1px solid #bfdbfe;
+
+    text-transform: uppercase;
+}
+
+
+/* Navigation Links */
 
 .nav-links {
     display: flex;
-    gap: 32px;
-    list-style: none;
+    align-items: center;
+    gap: 7px;
 }
 
 .nav-links a {
     text-decoration: none;
-    color: #434655;
+
+    color: #475569;
+
+    font-size: 14px;
     font-weight: 500;
+
+    padding: 9px 15px;
+
+    border-radius: 9px;
+
+    transition: 0.2s;
 }
 
-.nav-links a:hover,
-.nav-links .active {
-    color: #004ac6;
+.nav-links a:hover {
+    color: #2563eb;
+    background: #f1f5f9;
 }
+
+
+/* Active Link */
+
+.nav-links a.active {
+    color: #2563eb;
+    background: #eff6ff;
+    font-weight: 600;
+}
+
+
+/* Logout */
+
+.nav-links a.logout {
+    margin-left: 8px;
+
+    color: #dc2626;
+
+    background: #fef2f2;
+
+    border: 1px solid #fee2e2;
+}
+
+.nav-links a.logout:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
 
 
 /* Hero */
@@ -155,6 +231,17 @@ header {
 .primary-btn:hover {
     background: #003a9d;
     transform: translateY(-2px);
+}
+
+.nav-links a.primary-btn {
+    background: #004ac6;
+    color: white;
+    border: 1px solid #004ac6;
+}
+
+.nav-links a.primary-btn:hover {
+    background: #003a9d;
+    color: white;
 }
 
 .secondary-btn {
@@ -677,4 +764,127 @@ footer p {
 .primary-btn:hover {
     background: #003a9d;
     transform: translateY(-2px);
+}
+
+/* Mobile Responsive Navbar */
+@media (max-width: 600px) {
+    .navbar {
+        height: auto;
+        min-height: 74px;
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .brand {
+        min-width: 0;
+        gap: 8px;
+    }
+
+    .brand img {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+    }
+
+    .brand-name {
+        font-size: 15px;
+    }
+
+    .student-badge {
+        margin-left: 4px;
+        padding: 3px 7px;
+        font-size: 10px;
+    }
+
+    .nav-links {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .nav-links a {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .nav-links a.logout {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 380px) {
+    .brand-name {
+        font-size: 13px;
+    }
+
+    .student-badge {
+        font-size: 9px;
+        padding: 3px 5px;
+    }
+
+    .nav-links a {
+        padding: 7px 8px;
+        font-size: 12px;
+    }
+}
+@media (max-width: 600px) {
+    .navbar {
+        height: auto;
+        min-height: 74px;
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .brand {
+        min-width: 0;
+        gap: 8px;
+    }
+
+    .brand img {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+    }
+
+    .brand-name {
+        font-size: 15px;
+    }
+
+    .nav-links {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-end;
+    }
+
+    .nav-links a {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+}
+@media (max-width: 600px) {
+    header.navbar {
+        width: 100%;
+    }
+}
+@media (max-width: 600px) {
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    header.navbar {
+        position: sticky;
+        top: 0;
+        left: 0;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
 }

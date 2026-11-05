@@ -1,0 +1,11 @@
+.env
+**/.env
+!**/.env.example
+uploads/
+converted_pdfs/
+vendor/
+__pycache__/
+*.py[cod]
+ai_backend/.venv/
+ai_backend/venv/
+chat-proxy-backup.php

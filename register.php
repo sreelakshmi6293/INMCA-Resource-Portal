@@ -201,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST" action="" autocomplete="off" onsubmit="return validateRegisterForm()">
         <div class="form-group">
             <label>Full Name</label>
-            <input type="text" id="name" name="name" placeholder="John Doe" value="<?php echo htmlspecialchars($name); ?>" autocomplete="off" class="<?php echo isset($field_errors['name']) ? 'invalid-input' : ''; ?>">
+            <input type="text" id="name" name="name" placeholder="Full Name" value="<?php echo htmlspecialchars($name); ?>" autocomplete="off" class="<?php echo isset($field_errors['name']) ? 'invalid-input' : ''; ?>">
             <div class="error-msg" id="msg-name" style="<?php echo isset($field_errors['name']) ? 'display:block;' : ''; ?>">
                 <?php echo $field_errors['name'] ?? ''; ?>
             </div>

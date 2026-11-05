@@ -29,27 +29,93 @@ $total_admins = $total_admins_query->fetch_assoc()['total'] ?? 0;
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
         body { background-color: #f4f6f9; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
         header { background-color: #ffffff; border-bottom: 1px solid #e1e4e8; width: 100%; }
-        .navbar { max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #004ac6; font-weight: bold; font-size: 18px; }
-        .logo-icon { background-color: #004ac6; color: #fff; width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-        .nav-links { list-style: none; display: flex; align-items: center; gap: 20px; }
-        .nav-links a { text-decoration: none; color: #596579; font-weight: 500; }
-        .nav-links a.active, .nav-links a:hover { color: #004ac6; }
+        .navbar {
+            height: 74px;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 45px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            text-decoration: none;
+        }
+
+        .brand img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .admin-badge {
+            margin-left: 8px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #2563eb;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #475569;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 9px 15px;
+            border-radius: 9px;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #2563eb;
+            background: #f1f5f9;
+        }
+
+        .nav-links a.active {
+            color: #2563eb;
+            background: #eff6ff;
+            font-weight: 600;
+        }
+
+        .logout {
+            margin-left: 8px;
+            color: #dc2626 !important;
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+        }
+
+        .logout:hover {
+            background: #fee2e2 !important;
+            color: #b91c1c !important;
+        }
+
         
-        /* Updated Logout Button styling to match other nav links */
-        .logout-btn { 
-            background-color: #f2f4f7; 
-            color: #344054; 
-            padding: 8px 14px; 
-            border-radius: 6px; 
-            font-size: 14px; 
-            font-weight: 500; 
-            transition: all 0.2s ease;
-        }
-        .logout-btn:hover { 
-            background-color: #e4e7ec; 
-            color: #004ac6; 
-        }
+        
 
         .dashboard-container { max-width: 1200px; width: 100%; margin: 30px auto; padding: 0 20px; flex: 1; }
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: #fff; padding: 20px 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
@@ -61,23 +127,90 @@ $total_admins = $total_admins_query->fetch_assoc()['total'] ?? 0;
 
         footer { background-color: #ffffff; border-top: 1px solid #e1e4e8; padding: 20px; text-align: center; margin-top: auto; }
         .footer-logo { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: bold; color: #004ac6; }
+        @media (max-width: 600px) {
+    .navbar {
+        height: auto;
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .brand {
+        gap: 8px;
+    }
+
+    .brand img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .brand-name {
+        font-size: 15px;
+    }
+
+    .nav-links {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 4px;
+    }
+
+    .nav-links a {
+        padding: 7px 9px;
+        font-size: 12px;
+    }
+
+    .logout {
+        margin-left: 0;
+    }
+
+    .dashboard-container {
+        margin: 18px auto;
+        padding: 0 14px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 18px;
+    }
+
+    .dashboard-header > div:last-child {
+        text-align: left !important;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    footer {
+        padding: 16px;
+        font-size: 10px;
+    }
+}
     </style>
 </head>
 <body>
 
     <!-- Header / Navbar -->
-    <header>
-        <div class="navbar">
-            <a href="admin_dashboard.php" class="logo">
-             <img src="images/logo (3).png" alt="INMCA Resources Logo" class="logo-img">   
-                <span>INMCA Resource Portal</span>  
-            <ul class="nav-links">
-                <li><a href="admin_dashboard.php" class="active">Dashboard</a></li>
-                <li><a href="admin_students.php">Students</a></li>
-                <li><a href="manage_faculty.php">Faculty</a></li>
-                <li><a href="manage_subjects.php">Subjects</a></li>
-                <li><a href="logout.php" class="logout-btn">Logout</a></li>
-            </ul>
+    <header class="navbar">
+        
+            <a href="admin_dashboard.php" class="brand">
+             <img src="images/logo.svg" alt="INMCA Resources Logo" >   
+             <div>
+                <span class="brand-name">INMCA Resource Portal</span>  
+                <span class="admin-badge">Admin</span>
+             </div>
+            </a>
+            <nav  class="nav-links">
+                <a href="admin_dashboard.php" class="active">Dashboard</a>
+                <a href="admin_students.php">Students</a>
+                <a href="manage_faculty.php">Faculty</a>
+                <a href="manage_subjects.php">Subjects</a>
+                <a href="logout.php" class="logout">Logout</a>
+            </nav>
         </div>
     </header>
 
@@ -115,11 +248,9 @@ $total_admins = $total_admins_query->fetch_assoc()['total'] ?? 0;
 
     <!-- Footer -->
     <footer>
-        <div class="footer-logo">
-            <div class="logo-icon">A</div>
-            <span>AdminPortal</span>
-        </div>
-        <p>&copy; <?php echo date('Y'); ?> Portal Management System. All rights reserved.</p>
+       <p>
+         &copy; <?php echo date('Y'); ?> INMCA Resource Portal. Empowering Academic Excellence.
+        </p>
     </footer>
 
 </body>
